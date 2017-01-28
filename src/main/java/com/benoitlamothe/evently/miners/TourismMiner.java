@@ -1,6 +1,9 @@
 package com.benoitlamothe.evently.miners;
 
+import com.benoitlamothe.evently.entity.Asset;
 import com.benoitlamothe.evently.entity.Event;
+import com.benoitlamothe.evently.utils.CloudUtils;
+import com.google.cloud.ExceptionHandler;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
@@ -14,6 +17,8 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -44,17 +49,34 @@ public class TourismMiner {
             paging += 5;
 
             List<Event> cevents = getEvents(doc);
-            cevents.stream().forEach(x -> System.out.println(x.name));
             events.addAll(cevents);
         }
         Connection conn = ds.getConnection();
         for(Event event : events) {
-            event.getSQLInsert(conn).execute();
+            PreparedStatement pstmt = event.getSQLInsert(conn);
+
+            pstmt.executeUpdate();
+
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                for(String url : event.imageSources) {
+                    if(!url.startsWith("http")) {
+                        continue;
+                    }
+                    Asset a = new Asset();
+                    a.eventId = rs.getInt(1);
+                    a.type = Asset.IMAGE_ASSET;
+                    try {
+                        a.url = CloudUtils.STORAGE_URI + CloudUtils.downloadToBucket(url).getName();
+                        a.getSQLInsert(conn).execute();
+                    } catch (Exception e) {}
+                }
+            }
         }
     }
 
     static boolean shouldContinue(Document doc) {
-        return doc.text().indexOf("Désolé, aucun événement disponible pour le moment...") == -1;
+        return !doc.text().contains("Désolé, aucun événement disponible pour le moment...");
     }
 
     static List<Event> getEvents(Document doc) {
@@ -66,6 +88,8 @@ public class TourismMiner {
                     Event e = new Event();
 
                     e.name = sanitize(x.select("h1").get(0).text());
+
+                    System.out.println(e.name);
 
                     e.description = sanitize(x.childNodes()
                             .stream()
@@ -103,9 +127,9 @@ public class TourismMiner {
 
                     if (locationNode.isPresent()) {
                         e.location = sanitize(locationNode.get().nextSibling().toString());
-                        //LatLong latlng = getLatLong(e.location);
-                        //e.latitude = latlng.latitude;
-                        //e.longitude = latlng.longitude;
+                        LatLong latlng = getLatLong(e.location);
+                        e.latitude = latlng.latitude;
+                        e.longitude = latlng.longitude;
                     } else {
                         e.location = "";
                     }
@@ -158,8 +182,11 @@ public class TourismMiner {
                         }
                     }
 
-                    e.latitude = 0;
-                    e.longitude = 0;
+
+                    e.imageSources = x.select("img")
+                            .stream()
+                            .map(y -> y.attr("src"))
+                            .collect(Collectors.toList());
 
                     return e;
                 })
@@ -181,12 +208,15 @@ public class TourismMiner {
     }
 
     static LatLong getLatLong(String query) {
-
+        System.out.println("Query: " + query);
         try {
             GeocodingResult[] results = GeocodingApi.geocode(geoContext, query).await();
-            GeocodingResult first = results[0];
-
-            return new LatLong((float)first.geometry.location.lat, (float)first.geometry.location.lng);
+            if(results.length > 0) {
+                GeocodingResult first = results[0];
+                return new LatLong((float)first.geometry.location.lat, (float)first.geometry.location.lng);
+            } else {
+                return new LatLong(0, 0);
+            }
 
         } catch (Exception e) {
             throw new RuntimeException(e);

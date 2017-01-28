@@ -10,6 +10,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
@@ -20,19 +21,15 @@ import java.util.UUID;
 public class CloudUtils {
     public static final String STORAGE_URI = "https://storage.googleapis.com/evvnt_assets/";
 
-    public static Blob downloadToBucket(String url) {
-        try {
-            File tmpImg = new File("/tmp/", UUID.randomUUID().toString());
-            HTTPUtils.downloadFromUrl(new URL(url), tmpImg);
-            BlobId blobId = BlobId.of("evvnt_assets", DigestUtils.md5Hex(new FileInputStream(tmpImg)) + "." + FilenameUtils.getExtension(url));
-            Blob blob = Main.defaultCloudStorage.get("evvnt_assets").create(blobId.getName(),
-                    new FileInputStream(tmpImg),
-                    Bucket.BlobWriteOption.predefinedAcl(Storage.PredefinedAcl.PUBLIC_READ));
-            tmpImg.delete();
+    public static Blob downloadToBucket(String url) throws IOException {
+        File tmpImg = new File("/tmp/", UUID.randomUUID().toString());
+        HTTPUtils.downloadFromUrl(new URL(url), tmpImg);
+        BlobId blobId = BlobId.of("evvnt_assets", DigestUtils.md5Hex(new FileInputStream(tmpImg)) + "." + FilenameUtils.getExtension(url));
+        Blob blob = Main.defaultCloudStorage.get("evvnt_assets").create(blobId.getName(),
+                new FileInputStream(tmpImg),
+                Bucket.BlobWriteOption.predefinedAcl(Storage.PredefinedAcl.PUBLIC_READ));
+        tmpImg.delete();
 
-            return blob;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return blob;
     }
 }
