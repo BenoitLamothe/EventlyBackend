@@ -49,6 +49,9 @@ public class Attraction {
     @SerializedName("priceRange")
     public String priceRange;
 
+    @SerializedName("categories")
+    public String categories;
+
     @SerializedName("reviews")
     public List<AttractionReview> reviews;
 
@@ -71,7 +74,7 @@ public class Attraction {
 
      */
     public PreparedStatement getSQLInsert(Connection connection) throws SQLException {
-        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions(`name`, loc_lat, loc_long, location, hours, hours_encoded, description, source_url, phone, website, price_range) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions(`name`, loc_lat, loc_long, location, hours, hours_encoded, description, source_url, phone, website, price_range, categories) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         int i = 0;
         pst.setObject(++i, this.name);
         pst.setObject(++i, this.latitude);
@@ -84,6 +87,7 @@ public class Attraction {
         pst.setObject(++i, this.phone);
         pst.setObject(++i, this.website);
         pst.setObject(++i, this.priceRange);
+        pst.setObject(++i, this.categories);
 
         return pst;
     }

@@ -66,12 +66,14 @@ public class YelpMiner {
 
             Attraction currentAttraction = new Attraction();
             currentAttraction.name = business.getString("name");
-            currentAttraction.location = String.format("%s, %s, %s %s, %s",
-                    business.getJSONObject("location").getString("address1"),
-                    business.getJSONObject("location").getString("city"),
-                    business.getJSONObject("location").getString("state"),
-                    business.getJSONObject("location").getString("zip_code"),
-                    business.getJSONObject("location").getString("country"));
+            try { currentAttraction.location = business.getJSONObject("location").has("address1") ? business.getJSONObject("location").getString("address1") + ", " : ""; } catch (Throwable e) { /* yolo */ }
+            currentAttraction.location += business.getJSONObject("location").has("city") ? business.getJSONObject("location").getString("city") + ", " : "";
+            currentAttraction.location += business.getJSONObject("location").has("state") ? business.getJSONObject("location").getString("state") + ", " : "";
+            currentAttraction.location += business.getJSONObject("location").has("zip_code") ? business.getJSONObject("location").getString("zip_code") + ", " : "";
+            currentAttraction.location += business.getJSONObject("location").has("country") ? business.getJSONObject("location").getString("country") + ", " : "";
+            currentAttraction.location = currentAttraction.location.replaceAll("^(, )(.*)", "$2");
+            currentAttraction.location = currentAttraction.location.replaceAll("(.*)(, )$", "$1");
+
             currentAttraction.latitude = (float) business.getJSONObject("coordinates").getDouble("latitude");
             currentAttraction.longitude = (float) business.getJSONObject("coordinates").getDouble("longitude");
             currentAttraction.hoursShift = businessDetail.has("hours") ? this.determineHoursShift(businessDetail.getJSONArray("hours")) : 0;
@@ -81,6 +83,17 @@ public class YelpMiner {
             currentAttraction.website = "";
             currentAttraction.priceRange = business.has("price") ? business.getString("price") : null;
             currentAttraction.reviewStars = (float) business.getDouble("rating");
+
+            if(business.has("categories")) {
+                currentAttraction.categories = "";
+                for(int j = 0; j < business.getJSONArray("categories").length(); j++) {
+                    JSONObject category = business.getJSONArray("categories").getJSONObject(j);
+                    currentAttraction.categories += category.getString("title") + ", ";
+                }
+                if(currentAttraction.categories.length() > 2)
+                    currentAttraction.categories = currentAttraction.categories.substring(0, currentAttraction.categories.length() - 2);
+            }
+
             PreparedStatement pstmtAttraction = currentAttraction.getSQLInsert(dbConn);
             pstmtAttraction.executeUpdate();
 
@@ -92,6 +105,7 @@ public class YelpMiner {
 
             LinkedList<Asset> assets = new LinkedList<Asset>();
             for(String url : photos) {
+                if(url.isEmpty()) { continue; }
                 ResultSet keys = pstmtAttraction.getGeneratedKeys();
                 keys.next();
 
@@ -105,11 +119,10 @@ public class YelpMiner {
 
             dbConn.commit();
             System.out.println("Done parsing " + i + " - " + currentAttraction.name);
-            offset++;
         }
 
         if(offset + limit < totalResult) {
-            minePerLocation(location, limit, offset);
+            minePerLocation(location, limit, offset + limit);
         }
     }
 
