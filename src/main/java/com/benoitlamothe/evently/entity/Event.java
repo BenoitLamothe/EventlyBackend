@@ -17,6 +17,9 @@ import java.util.List;
 
 public class Event {
 
+    @SerializedName("id")
+    public int id;
+
     @SerializedName("name")
     public String name;
 
@@ -50,25 +53,8 @@ public class Event {
     @SerializedName("priceDisplay")
     public String priceDisplay;
 
-
+    @SerializedName("images")
     public List<String> imageSources;
-
-    /*
-        CREATE TABLE `Events` (
-          `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-          `name` varchar(254) NOT NULL DEFAULT '',
-          `loc_lat` float NOT NULL,
-          `loc_long` float NOT NULL,
-          `location` varchar(254) NOT NULL DEFAULT '',
-          `startDatetime` datetime NOT NULL,
-          `endDatetime` datetime DEFAULT NULL,
-          `category` varchar(254) NOT NULL DEFAULT '',
-          `description` text,
-          `website` varchar(254) DEFAULT NULL,
-          `price_range` float DEFAULT NULL,
-          PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-    */
 
     public PreparedStatement getSQLInsert(Connection connection) throws SQLException {
         PreparedStatement pst = connection.prepareStatement("INSERT INTO Events(`name`, loc_lat, loc_long, location, startDatetime, endDatetime, category, description, website, price_range, price_display) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", java.sql.Statement.RETURN_GENERATED_KEYS);
@@ -88,7 +74,48 @@ public class Event {
         return pst;
     }
 
-    static List<Event> fromResultSet(ResultSet resultSet) {
-        return new ArrayList<>();
+
+
+    public static List<Event> getAll(Connection conn) throws SQLException {
+        PreparedStatement pst = conn.prepareStatement("SELECT * FROM Events INNER JOIN Assets ON Events.id = Assets.event_id");
+
+        ResultSet rst = pst.executeQuery();
+        ArrayList<Event> events = new ArrayList<>();
+        while(rst.next()) {
+            boolean duplicate = false;
+            for(Event e : events) {
+                if(e.id == rst.getInt("id")) {
+                    duplicate = true;
+                    e.imageSources.add(rst.getString("url"));
+                    break;
+                }
+            }
+
+            if(duplicate) {
+                continue;
+            }
+
+            Event e = new Event();
+            e.id = rst.getInt("id");
+            e.name = rst.getString("name");
+            e.latitude = rst.getFloat("loc_lat");
+            e.longitude = rst.getFloat("loc_long");
+            e.location = rst.getString("location");
+            e.startTime = rst.getDate("startDateTime");
+            e.endTime = rst.getDate("endDateTime");
+            e.category = rst.getString("category");
+            e.description = rst.getString("description");
+            e.link = rst.getString("website");
+            e.price = rst.getFloat("price_range");
+            e.priceDisplay = rst.getString("price_display");
+
+            e.imageSources = new ArrayList<String>(){{
+                add(rst.getString("url"));
+            }};
+
+            events.add(e);
+        }
+
+        return events;
     }
 }
