@@ -26,6 +26,8 @@ import java.util.UUID;
  */
 public class Asset {
 
+    public static final String IMAGE_ASSET = "Image";
+
     @SerializedName("attractionId")
     public int attactionId;
 

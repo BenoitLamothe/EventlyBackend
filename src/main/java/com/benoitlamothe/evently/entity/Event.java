@@ -5,6 +5,7 @@ package com.benoitlamothe.evently.entity;
  */
 
 import com.google.gson.annotations.SerializedName;
+import sun.tools.tree.Statement;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -49,6 +50,9 @@ public class Event {
     @SerializedName("priceDisplay")
     public String priceDisplay;
 
+
+    public List<String> imageSources;
+
     /*
         CREATE TABLE `Events` (
           `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -67,7 +71,7 @@ public class Event {
     */
 
     public PreparedStatement getSQLInsert(Connection connection) throws SQLException {
-        PreparedStatement pst = connection.prepareStatement("INSERT INTO Events(`name`, loc_lat, loc_long, location, startDatetime, endDatetime, category, description, website, price_range, price_display) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement pst = connection.prepareStatement("INSERT INTO Events(`name`, loc_lat, loc_long, location, startDatetime, endDatetime, category, description, website, price_range, price_display) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", java.sql.Statement.RETURN_GENERATED_KEYS);
         int i = 0;
         pst.setObject(++i, this.name);
         pst.setObject(++i, this.latitude);

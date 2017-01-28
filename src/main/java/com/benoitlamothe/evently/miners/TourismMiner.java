@@ -1,5 +1,6 @@
 package com.benoitlamothe.evently.miners;
 
+import com.benoitlamothe.evently.entity.Asset;
 import com.benoitlamothe.evently.entity.Event;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
@@ -14,6 +15,8 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -44,12 +47,25 @@ public class TourismMiner {
             paging += 5;
 
             List<Event> cevents = getEvents(doc);
-            cevents.stream().forEach(x -> System.out.println(x.name));
             events.addAll(cevents);
         }
         Connection conn = ds.getConnection();
         for(Event event : events) {
-            event.getSQLInsert(conn).execute();
+            PreparedStatement pstmt = event.getSQLInsert(conn);
+
+            pstmt.executeUpdate();
+
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                for(String url : event.imageSources) {
+                    Asset a = new Asset();
+                    a.eventId = rs.getInt(1);
+                    a.type = Asset.IMAGE_ASSET;
+                    a.url = url;
+
+                    a.getSQLInsert(conn).execute();
+                }
+            }
         }
     }
 
@@ -66,6 +82,8 @@ public class TourismMiner {
                     Event e = new Event();
 
                     e.name = sanitize(x.select("h1").get(0).text());
+
+                    System.out.println(e.name);
 
                     e.description = sanitize(x.childNodes()
                             .stream()
@@ -158,6 +176,12 @@ public class TourismMiner {
                         }
                     }
 
+
+                    e.imageSources = x.select("img")
+                            .stream()
+                            .map(y -> y.attr("src"))
+                            .collect(Collectors.toList());
+
                     e.latitude = 0;
                     e.longitude = 0;
 
@@ -181,7 +205,7 @@ public class TourismMiner {
     }
 
     static LatLong getLatLong(String query) {
-
+        System.out.println("Query: " + query);
         try {
             GeocodingResult[] results = GeocodingApi.geocode(geoContext, query).await();
             GeocodingResult first = results[0];
