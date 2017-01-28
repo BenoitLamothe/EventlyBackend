@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.LinkedList;
 
 /**
  * Created by olivier on 2017-01-28.
@@ -35,7 +36,32 @@ public class ParksOpenDataMiner {
             Attraction attrc = new Attraction();
             attrc.name = featurePropertiesObj.getString("NOM");
             attrc.location = featurePropertiesObj.getString("Adresse");
+            LinkedList<Double> longs = new LinkedList<Double>();
+            LinkedList<Double> lats = new LinkedList<Double>();
+            for(int j = 0; j < featureObj.getJSONObject("geometry").getJSONArray("coordinates").length(); j++) {
+                for (int jj = 0; jj < featureObj.getJSONObject("geometry").getJSONArray("coordinates").getJSONArray(j).length(); jj++) {
+                    if(featureObj.getJSONObject("geometry").getJSONArray("coordinates").getJSONArray(j).getJSONArray(jj).length() < 2) {
+                        continue;
+                    }
 
+                    try {
+                        double loc_long = featureObj.getJSONObject("geometry").getJSONArray("coordinates").getJSONArray(j).getJSONArray(jj).getDouble(0);
+                        double loc_lat = featureObj.getJSONObject("geometry").getJSONArray("coordinates").getJSONArray(j).getJSONArray(jj).getDouble(1);
+                        longs.add(loc_long);
+                        lats.add(loc_lat);
+                    } catch (Throwable e) {
+
+                    }
+                }
+            }
+
+            if(longs.size() == 0 || lats.size() == 0) {
+                continue;
+            }
+
+            attrc.longitude = (float) (longs.stream().reduce((x, y) -> x+y).get() / longs.size());
+            attrc.latitude = (float) (lats.stream().reduce((x, y) -> x+y).get() / lats.size());
+            attrc.link = PARKS_URL;
 
             String rtype = featurePropertiesObj.getString("TYPE");
 
@@ -45,7 +71,7 @@ public class ParksOpenDataMiner {
                 attrc.categories = "Green Space";
             }
 
-            if(!attrc.categories.equals("")) {
+            if(attrc.categories != null && !attrc.categories.equals("")) {
                 attrc.getSQLInsert(dbConn).executeUpdate();
                 System.out.println("Inserted attraction " + i);
             }

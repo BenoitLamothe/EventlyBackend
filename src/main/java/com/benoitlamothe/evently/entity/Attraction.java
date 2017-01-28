@@ -74,7 +74,7 @@ public class Attraction {
 
      */
     public PreparedStatement getSQLInsert(Connection connection) throws SQLException {
-        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions_Test(`name`, loc_lat, loc_long, location, hours, hours_encoded, description, source_url, phone, website, price_range, categories) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions(`name`, loc_lat, loc_long, location, hours, hours_encoded, description, source_url, phone, website, price_range, categories) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         int i = 0;
         pst.setObject(++i, this.name);
         pst.setObject(++i, this.latitude);
