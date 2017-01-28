@@ -21,7 +21,7 @@ public class Main {
             return;
         }*/
 
-        final HikariConfig config = new HikariConfig("hikari.properties");
+        final HikariConfig config = new HikariConfig("/hikari.properties");
         final HikariDataSource ds = new HikariDataSource(config);
         final GsonBuilder builder = new GsonBuilder();
 
