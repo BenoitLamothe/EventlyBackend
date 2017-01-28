@@ -1,6 +1,8 @@
 package com.benoitlamothe.evently.miners;
 
+import com.benoitlamothe.evently.entity.Asset;
 import com.benoitlamothe.evently.entity.Attraction;
+import com.benoitlamothe.evently.utils.CloudUtils;
 import com.google.gson.JsonObject;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -8,6 +10,9 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 /**
  * Created by jeremiep on 2017-01-28.
@@ -60,6 +65,20 @@ public class YelpMiner {
             currentAttraction.website = "";
             currentAttraction.priceRange = business.has("price") ? business.getString("price") : null;
             currentAttraction.reviewStars = (float) business.getDouble("rating");
+
+            LinkedList<String> photos = new LinkedList<String>();
+            photos.add(business.getString("image_url"));
+            for(Object url : businessDetail.getJSONArray("photos")) {
+                photos.add((String) url);
+            }
+
+            LinkedList<Asset> assets = new LinkedList<Asset>();
+            for(String url : photos) {
+                Asset ass = new Asset();
+                ass.url = CloudUtils.STORAGE_URI + CloudUtils.downloadToBucket(url);
+                ass.type = "Image";
+            }
+
             System.out.println("Done parsing " + i + " - " + currentAttraction.name);
             offset++;
         }
@@ -88,5 +107,6 @@ public class YelpMiner {
     public static void main(String[] args) throws UnirestException {
         YelpMiner miner = new YelpMiner();
         miner.minePerLocation("Shawinigan");
+        //CloudUtils.downloadToBucket("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Pepe_at_Yankee_Stadium.jpg/262px-Pepe_at_Yankee_Stadium.jpg");
     }
 }

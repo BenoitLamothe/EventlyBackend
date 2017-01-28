@@ -1,11 +1,24 @@
 package com.benoitlamothe.evently.entity;
 
+import com.benoitlamothe.evently.Main;
+import com.benoitlamothe.evently.utils.HTTPUtils;
+import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.google.gson.annotations.SerializedName;
+import org.apache.commons.io.FilenameUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by olivier on 2017-01-28.
@@ -45,4 +58,5 @@ public class Asset {
 
         return pst;
     }
+
 }
