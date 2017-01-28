@@ -3,6 +3,7 @@ package com.benoitlamothe.evently.miners;
 import com.benoitlamothe.evently.entity.Asset;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.utils.CloudUtils;
+import com.benoitlamothe.evently.utils.GeoUtil;
 import com.google.cloud.ExceptionHandler;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
@@ -31,8 +32,6 @@ import java.util.stream.Collectors;
  * Created by olivier on 2017-01-28.
  */
 public class TourismMiner {
-
-    public static GeoApiContext geoContext = new GeoApiContext().setApiKey("AIzaSyAYDNsIg7jX8OJYmhd81zpeHmG4aObW_2M");
 
     public static void main(String[] args) throws IOException, SQLException {
         final HikariConfig config = new HikariConfig("/hikari.properties");
@@ -127,7 +126,7 @@ public class TourismMiner {
 
                     if (locationNode.isPresent()) {
                         e.location = sanitize(locationNode.get().nextSibling().toString());
-                        LatLong latlng = getLatLong(e.location);
+                        GeoUtil.LatLong latlng = GeoUtil.getLatLong(e.location);
                         e.latitude = latlng.latitude;
                         e.longitude = latlng.longitude;
                     } else {
@@ -205,31 +204,5 @@ public class TourismMiner {
         val = val.replaceAll("&#xa0;", " ").trim();
 
         return val;
-    }
-
-    static LatLong getLatLong(String query) {
-        System.out.println("Query: " + query);
-        try {
-            GeocodingResult[] results = GeocodingApi.geocode(geoContext, query).await();
-            if(results.length > 0) {
-                GeocodingResult first = results[0];
-                return new LatLong((float)first.geometry.location.lat, (float)first.geometry.location.lng);
-            } else {
-                return new LatLong(0, 0);
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    static class LatLong {
-        public float latitude;
-        public float longitude;
-
-        public LatLong(float latitude, float longitude) {
-            this.latitude = latitude;
-            this.longitude = longitude;
-        }
     }
 }
