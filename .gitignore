@@ -2,3 +2,5 @@
 *.iml
 .gradle
 build
+src/main/resources/hikari.properties
+
