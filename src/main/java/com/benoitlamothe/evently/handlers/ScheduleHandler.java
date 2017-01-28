@@ -1,6 +1,6 @@
 package com.benoitlamothe.evently.handlers;
 
-import com.benoitlamothe.evently.entity.ScheduleCriteria;
+import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import spark.Request;
