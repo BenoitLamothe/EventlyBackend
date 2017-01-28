@@ -115,6 +115,7 @@ public class TourismMiner {
 
                     try {
                         e.startTime = dateFormat.parse(x.select("time").get(0).attr("datetime"));
+                        e.endTime = (Date)e.startTime.clone();
                     } catch (ParseException e1) {
                         e1.printStackTrace();
                     }
@@ -171,9 +172,30 @@ public class TourismMiner {
                         Matcher rangeMatcher = rp.matcher(hourRaw);
                         Matcher fixedMatcher = p.matcher(hourRaw);
 
-                        if(rangeMatcher)
+                        if(rangeMatcher.matches()) {
+                            Calendar cs = Calendar.getInstance();
+                            cs.setTime(e.startTime);
 
-                        if(fixedMatcher.matches()) {
+                            cs.add(Calendar.HOUR, Integer.parseInt(fixedMatcher.group("fh_h")));
+
+                            if(rangeMatcher.group("fh_m") != null) {
+                                cs.add(Calendar.MINUTE, Integer.parseInt(fixedMatcher.group("fh_m")));
+                            }
+
+                            e.startTime = cs.getTime();
+
+                            Calendar ce = Calendar.getInstance();
+                            ce.setTime(e.endTime);
+
+                            ce.add(Calendar.HOUR, Integer.parseInt(fixedMatcher.group("sh_h")));
+
+                            if(rangeMatcher.group("sh_m") != null) {
+                                ce.add(Calendar.MINUTE, Integer.parseInt(fixedMatcher.group("sh_m")));
+                            }
+
+                            e.startTime = ce.getTime();
+
+                        } else if(fixedMatcher.matches()) {
                             Calendar c = Calendar.getInstance();
                             c.setTime(e.startTime);
 
@@ -182,6 +204,8 @@ public class TourismMiner {
                             if(fixedMatcher.groupCount() == 3) {
                                 c.add(Calendar.MINUTE, Integer.parseInt(fixedMatcher.group(2)));
                             }
+
+                            e.startTime = c.getTime();
                         }
                     }
 
