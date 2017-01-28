@@ -1,5 +1,6 @@
 package com.benoitlamothe.evently;
 
+import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.benoitlamothe.evently.handlers.EventsHandler;
 import com.benoitlamothe.evently.handlers.ScheduleHandler;
 import com.benoitlamothe.evently.utils.JsonTransformer;
@@ -43,6 +44,8 @@ public class Main {
         final HikariConfig config = new HikariConfig("/hikari.properties");
         final HikariDataSource ds = new HikariDataSource(config);
         GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(ScheduleCriteria.class, ScheduleCriteria.getCriteriasDeserializer());
+        builder.registerTypeAdapter(ScheduleCriteria.class, ScheduleCriteria.getCriteriasSerializer());
 
         builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 

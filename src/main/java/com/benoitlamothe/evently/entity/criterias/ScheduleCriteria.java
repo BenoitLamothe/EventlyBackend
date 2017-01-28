@@ -1,5 +1,6 @@
 package com.benoitlamothe.evently.entity.criterias;
 
+import com.google.api.client.json.Json;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
@@ -9,14 +10,24 @@ import java.lang.reflect.Type;
  */
 public abstract class ScheduleCriteria {
 
-    abstract JsonDeserializer<? extends ScheduleCriteria> getDeserializer();
+    abstract JsonDeserializer<? extends ScheduleCriteria> deserializer();
+    abstract JsonObject serializer();
 
-    static JsonDeserializer<ScheduleCriteria> getCriteriasDeserializer() {
+    public static JsonSerializer<ScheduleCriteria> getCriteriasSerializer() {
+        return new JsonSerializer<ScheduleCriteria>() {
+            @Override
+            public JsonElement serialize(ScheduleCriteria src, Type typeOfSrc, JsonSerializationContext context) {
+                return src.serializer();
+            }
+        };
+    }
+
+    public static JsonDeserializer<ScheduleCriteria> getCriteriasDeserializer() {
         return new JsonDeserializer<ScheduleCriteria>() {
             @Override
             public ScheduleCriteria deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
                 ScheduleCriteria crit = ScheduleCriteriaFactory.build(json.getAsJsonObject().get("name").getAsString());
-                return crit.getDeserializer().deserialize(json, typeOfT, context);
+                return crit.deserializer().deserialize(json, typeOfT, context);
             }
         };
     }

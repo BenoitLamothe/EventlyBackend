@@ -13,7 +13,7 @@ public class CategoriesCriteria extends ScheduleCriteria {
     private List<String> categories;
 
     @Override
-    JsonDeserializer<? extends ScheduleCriteria> getDeserializer() {
+    JsonDeserializer<? extends ScheduleCriteria> deserializer() {
         return new JsonDeserializer<CategoriesCriteria>() {
             @Override
             public CategoriesCriteria deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
@@ -26,5 +26,16 @@ public class CategoriesCriteria extends ScheduleCriteria {
                 return criteria;
             }
         };
+    }
+
+    @Override
+    JsonObject serializer() {
+        JsonObject serialized = new JsonObject();
+        serialized.add("name", new JsonPrimitive("categories"));
+        JsonArray arrValue = new JsonArray();
+        categories.forEach(arrValue::add);
+        serialized.add("value", arrValue);
+
+        return serialized;
     }
 }

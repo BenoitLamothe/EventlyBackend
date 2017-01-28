@@ -1,9 +1,6 @@
 package com.benoitlamothe.evently.entity.criterias;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
+import com.google.gson.*;
 
 import java.lang.reflect.Type;
 
@@ -14,7 +11,7 @@ public class BudgetCriteria extends ScheduleCriteria {
     private double value;
 
     @Override
-    JsonDeserializer<? extends ScheduleCriteria> getDeserializer() {
+    JsonDeserializer<? extends ScheduleCriteria> deserializer() {
         return new JsonDeserializer<ScheduleCriteria>() {
             @Override
             public ScheduleCriteria deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
@@ -23,5 +20,13 @@ public class BudgetCriteria extends ScheduleCriteria {
                 return criteria;
             }
         };
+    }
+
+    @Override
+    JsonObject serializer() {
+        JsonObject serialized = new JsonObject();
+        serialized.add("name", new JsonPrimitive("categories"));
+        serialized.add("value", new JsonPrimitive(this.value));
+        return serialized;
     }
 }
