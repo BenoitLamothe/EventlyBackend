@@ -43,7 +43,7 @@ public class Main {
         final HikariDataSource ds = new HikariDataSource(config);
         GsonBuilder builder = new GsonBuilder();
 
-        builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+        builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
         enableCORS("*", "GET POST PUT OPTIONS", "");
 
