@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 public class EventsHandler extends BaseHandler {
 
     public EventsHandler(DataSource dataSource) {
-        super(dataSource);
+        super(dataSource, null);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.benoitlamothe.evently;
 
 import com.benoitlamothe.evently.handlers.EventsHandler;
+import com.benoitlamothe.evently.handlers.ScheduleHandler;
 import com.benoitlamothe.evently.utils.JsonTransformer;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.ExceptionHandler;
@@ -48,6 +49,8 @@ public class Main {
         enableCORS("*", "GET POST PUT OPTIONS", "");
 
         get("/events", new EventsHandler(ds), new JsonTransformer(builder.create()));
+
+        post("/schedule", new ScheduleHandler(ds, builder.create()), new JsonTransformer(builder.create()));
 
         exception(Exception.class, (exception, request, response) -> {
             // Handle the exception here
