@@ -6,12 +6,16 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.ExceptionHandler;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
+import com.google.gson.annotations.JsonAdapter;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.text.DateFormat;
+import java.util.Date;
 
 import static spark.Spark.*;
 
@@ -37,7 +41,9 @@ public class Main {
     public static void main(String[] args) {
         final HikariConfig config = new HikariConfig("/hikari.properties");
         final HikariDataSource ds = new HikariDataSource(config);
-        final GsonBuilder builder = new GsonBuilder();
+        GsonBuilder builder = new GsonBuilder();
+
+        builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
 
         enableCORS("*", "GET POST PUT OPTIONS", "");
 
