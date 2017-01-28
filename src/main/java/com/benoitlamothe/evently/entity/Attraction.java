@@ -1,6 +1,7 @@
 package com.benoitlamothe.evently.entity;
 
 import com.google.gson.annotations.SerializedName;
+import com.mysql.cj.api.jdbc.Statement;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -70,8 +71,8 @@ public class Attraction {
 
      */
     public PreparedStatement getSQLInsert(Connection connection) throws SQLException {
-        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        int i = 1;
+        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions(`name`, loc_lat, loc_long, location, hours, hours_encoded, description, source_url, phone, website, price_range) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        int i = 0;
         pst.setObject(++i, this.name);
         pst.setObject(++i, this.latitude);
         pst.setObject(++i, this.longitude);

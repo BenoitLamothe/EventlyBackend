@@ -17,6 +17,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,8 +50,8 @@ public class Asset {
     */
 
     public PreparedStatement getSQLInsert(Connection connection) throws SQLException {
-        PreparedStatement pst = connection.prepareStatement("INSERT INTO Assets VALUES(?, ?, ?, ?)");
-        int i = 1;
+        PreparedStatement pst = connection.prepareStatement("INSERT INTO Assets(attraction_id, event_id, `type`, url   ) VALUES(?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        int i = 0;
         pst.setObject(++i, this.attactionId);
         pst.setObject(++i, this.eventId);
         pst.setObject(++i, this.type);

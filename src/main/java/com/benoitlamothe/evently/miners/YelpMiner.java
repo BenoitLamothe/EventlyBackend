@@ -8,9 +8,15 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
@@ -24,15 +30,25 @@ public class YelpMiner {
     private static String URL_SEARCH_API = "https://api.yelp.com/v3/businesses/search";
     private static String URL_BUSINESS_API = "https://api.yelp.com/v3/businesses/";
 
+    private static final HikariConfig config = new HikariConfig("/hikari.properties");
+    private static final HikariDataSource ds = new HikariDataSource(config);
+    private static Connection dbConn;
+
     static {
         Unirest.setDefaultHeader("Authorization", "Bearer " + OAUTH_TOKEN);
+        try {
+            dbConn = ds.getConnection();
+            dbConn.setAutoCommit(false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void minePerLocation(String location) throws UnirestException {
+    public void minePerLocation(String location) throws UnirestException, SQLException {
         minePerLocation(location, LIMIT, 0);
     }
 
-    public void minePerLocation(String location, int limit, int offset) throws UnirestException {
+    public void minePerLocation(String location, int limit, int offset) throws UnirestException, SQLException {
         String searchUrl = URL_SEARCH_API + "?location=" + location + "&limit=" + limit + "&offset=" + offset;
         System.out.println(searchUrl);
         HttpResponse<JsonNode> resultByLocation =
@@ -65,6 +81,8 @@ public class YelpMiner {
             currentAttraction.website = "";
             currentAttraction.priceRange = business.has("price") ? business.getString("price") : null;
             currentAttraction.reviewStars = (float) business.getDouble("rating");
+            PreparedStatement pstmtAttraction = currentAttraction.getSQLInsert(dbConn);
+            pstmtAttraction.executeUpdate();
 
             LinkedList<String> photos = new LinkedList<String>();
             photos.add(business.getString("image_url"));
@@ -74,11 +92,18 @@ public class YelpMiner {
 
             LinkedList<Asset> assets = new LinkedList<Asset>();
             for(String url : photos) {
+                ResultSet keys = pstmtAttraction.getGeneratedKeys();
+                keys.next();
+
                 Asset ass = new Asset();
-                ass.url = CloudUtils.STORAGE_URI + CloudUtils.downloadToBucket(url);
+                System.out.println("Downloaded " + url);
+                ass.url = CloudUtils.STORAGE_URI + CloudUtils.downloadToBucket(url).getName();
                 ass.type = "Image";
+                ass.attactionId = keys.getInt(1);
+                ass.getSQLInsert(dbConn).executeUpdate();
             }
 
+            dbConn.commit();
             System.out.println("Done parsing " + i + " - " + currentAttraction.name);
             offset++;
         }
@@ -104,7 +129,7 @@ public class YelpMiner {
         return finalShift;
     }
 
-    public static void main(String[] args) throws UnirestException {
+    public static void main(String[] args) throws UnirestException, SQLException {
         YelpMiner miner = new YelpMiner();
         miner.minePerLocation("Shawinigan");
         //CloudUtils.downloadToBucket("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Pepe_at_Yankee_Stadium.jpg/262px-Pepe_at_Yankee_Stadium.jpg");

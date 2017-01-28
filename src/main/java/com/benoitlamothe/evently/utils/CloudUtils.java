@@ -5,6 +5,7 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -23,7 +24,7 @@ public class CloudUtils {
         try {
             File tmpImg = new File("/tmp/", UUID.randomUUID().toString());
             HTTPUtils.downloadFromUrl(new URL(url), tmpImg);
-            BlobId blobId = BlobId.of("evvnt_assets", UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(url));
+            BlobId blobId = BlobId.of("evvnt_assets", DigestUtils.md5Hex(new FileInputStream(tmpImg)) + "." + FilenameUtils.getExtension(url));
             Blob blob = Main.defaultCloudStorage.get("evvnt_assets").create(blobId.getName(),
                     new FileInputStream(tmpImg),
                     Bucket.BlobWriteOption.predefinedAcl(Storage.PredefinedAcl.PUBLIC_READ));
