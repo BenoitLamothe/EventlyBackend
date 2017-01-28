@@ -2,6 +2,9 @@ package com.benoitlamothe.evently.entity;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -45,4 +48,37 @@ public class Attraction {
     @SerializedName("reviews")
     public List<AttractionReview> reviews;
 
+    /*
+        CREATE TABLE `Attractions` (
+      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+      `name` varchar(254) NOT NULL DEFAULT '',
+      `loc_lat` float NOT NULL,
+      `loc_long` float NOT NULL,
+      `location` varchar(254) NOT NULL DEFAULT '',
+      `hours` text,
+      `hours_encoded` int(11) DEFAULT NULL,
+      `description` text,
+      `source_url` varchar(254) NOT NULL DEFAULT '',
+      `phone` varchar(254) DEFAULT NULL,
+      `website` varchar(254) NOT NULL DEFAULT '',
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+     */
+    public PreparedStatement getSQLInsert(Connection connection) throws SQLException {
+        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        int i = 1;
+        pst.setObject(++i, this.name);
+        pst.setObject(++i, this.latitude);
+        pst.setObject(++i, this.longitude);
+        pst.setObject(++i, this.location);
+        pst.setObject(++i, this.hours);
+        pst.setObject(++i, this.hoursShift);
+        pst.setObject(++i, this.description);
+        pst.setObject(++i, this.link);
+        pst.setObject(++i, this.phone);
+        pst.setObject(++i, this.website);
+
+        return pst;
+    }
 }
