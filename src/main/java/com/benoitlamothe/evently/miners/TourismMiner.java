@@ -3,6 +3,7 @@ package com.benoitlamothe.evently.miners;
 import com.benoitlamothe.evently.entity.Asset;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.utils.CloudUtils;
+import com.google.cloud.ExceptionHandler;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
@@ -59,12 +60,16 @@ public class TourismMiner {
             ResultSet rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
                 for(String url : event.imageSources) {
+                    if(!url.startsWith("http")) {
+                        continue;
+                    }
                     Asset a = new Asset();
                     a.eventId = rs.getInt(1);
                     a.type = Asset.IMAGE_ASSET;
-                    a.url = CloudUtils.STORAGE_URI + CloudUtils.downloadToBucket(url).getName();
-
-                    a.getSQLInsert(conn).execute();
+                    try {
+                        a.url = CloudUtils.STORAGE_URI + CloudUtils.downloadToBucket(url).getName();
+                        a.getSQLInsert(conn).execute();
+                    } catch (Exception e) {}
                 }
             }
         }

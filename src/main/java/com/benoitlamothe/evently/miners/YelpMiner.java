@@ -13,6 +13,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,11 +45,11 @@ public class YelpMiner {
         }
     }
 
-    public void minePerLocation(String location) throws UnirestException, SQLException {
+    public void minePerLocation(String location) throws UnirestException, SQLException, IOException {
         minePerLocation(location, LIMIT, 0);
     }
 
-    public void minePerLocation(String location, int limit, int offset) throws UnirestException, SQLException {
+    public void minePerLocation(String location, int limit, int offset) throws UnirestException, SQLException, IOException {
         String searchUrl = URL_SEARCH_API + "?location=" + location + "&limit=" + limit + "&offset=" + offset;
         System.out.println(searchUrl);
         HttpResponse<JsonNode> resultByLocation =
@@ -129,7 +130,7 @@ public class YelpMiner {
         return finalShift;
     }
 
-    public static void main(String[] args) throws UnirestException, SQLException {
+    public static void main(String[] args) throws UnirestException, SQLException, IOException {
         YelpMiner miner = new YelpMiner();
         miner.minePerLocation("Shawinigan");
         //CloudUtils.downloadToBucket("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Pepe_at_Yankee_Stadium.jpg/262px-Pepe_at_Yankee_Stadium.jpg");
