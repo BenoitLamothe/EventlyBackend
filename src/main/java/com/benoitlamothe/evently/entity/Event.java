@@ -46,6 +46,9 @@ public class Event {
     @SerializedName("price")
     public float price;
 
+    @SerializedName("priceDisplay")
+    public String priceDisplay;
+
     /*
         CREATE TABLE `Events` (
           `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -64,8 +67,8 @@ public class Event {
     */
 
     public PreparedStatement getSQLInsert(Connection connection) throws SQLException {
-        PreparedStatement pst = connection.prepareStatement("INSERT INTO Events VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        int i = 1;
+        PreparedStatement pst = connection.prepareStatement("INSERT INTO Events(`name`, loc_lat, loc_long, location, startDatetime, endDatetime, category, description, website, price_range, price_display) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        int i = 0;
         pst.setObject(++i, this.name);
         pst.setObject(++i, this.latitude);
         pst.setObject(++i, this.longitude);
@@ -76,6 +79,7 @@ public class Event {
         pst.setObject(++i, this.description);
         pst.setObject(++i, this.link);
         pst.setObject(++i, this.price);
+        pst.setObject(++i, this.priceDisplay);
 
         return pst;
     }
