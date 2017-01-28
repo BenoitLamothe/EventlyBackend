@@ -165,18 +165,22 @@ public class TourismMiner {
                     if (hourNode.isPresent()) {
                         String hourRaw = hourNode.get().nextSibling().toString();
 
+                        Pattern rp = Pattern.compile("(?<fh_h>[0-9]{1,2})h(?<fh_m>[0-9]{1,2})?\\s*à\\s*(?<sh_h>[0-9]{1,2})h(?<sh_m>[0-9]{1,2})?");
                         Pattern p = Pattern.compile("([0-9]{1,2})h([0-9]{1,2})?");
 
-                        Matcher rangeMatcher = p.matcher(hourRaw);
+                        Matcher rangeMatcher = rp.matcher(hourRaw);
+                        Matcher fixedMatcher = p.matcher(hourRaw);
 
-                        if(rangeMatcher.matches()) {
+                        if(rangeMatcher)
+
+                        if(fixedMatcher.matches()) {
                             Calendar c = Calendar.getInstance();
                             c.setTime(e.startTime);
 
-                            c.add(Calendar.HOUR, Integer.parseInt(rangeMatcher.group(1)));
+                            c.add(Calendar.HOUR, Integer.parseInt(fixedMatcher.group(1)));
 
-                            if(rangeMatcher.groupCount() == 3) {
-                                c.add(Calendar.MINUTE, Integer.parseInt(rangeMatcher.group(2)));
+                            if(fixedMatcher.groupCount() == 3) {
+                                c.add(Calendar.MINUTE, Integer.parseInt(fixedMatcher.group(2)));
                             }
                         }
                     }

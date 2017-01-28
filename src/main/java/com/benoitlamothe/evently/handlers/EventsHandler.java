@@ -5,6 +5,8 @@ import spark.Request;
 import spark.Response;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.util.List;
 
 /**
  * Created by olivier on 2017-01-28.
@@ -17,6 +19,10 @@ public class EventsHandler extends BaseHandler {
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        return Event.getAll(this.dataSource.getConnection());
+        Connection conn = this.dataSource.getConnection();
+        List<Event> events = Event.getAll(conn);
+        conn.close();
+
+        return events;
     }
 }

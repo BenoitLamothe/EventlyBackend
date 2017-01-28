@@ -19,25 +19,23 @@ public class ScheduleHandler extends BaseHandler {
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
+        ScheduleRequest sr = this.serializer.fromJson(request.body(), ScheduleRequest.class);
+
+
+
+
         return null;
     }
 
     public static class ScheduleRequest {
 
         enum Availability {
-            MORNING("morning"),
-            AFTERNOON("afternoon"),
-            EVENING("evening");
-
-            private String value;
-
-            Availability(String value) {
-                this.value = value;
-            }
-
-            public String getValue() {
-                return this.value;
-            }
+            @SerializedName("morning")
+            MORNING,
+            @SerializedName("afternoon")
+            AFTERNOON,
+            @SerializedName("evening")
+            EVENING
         }
 
         @SerializedName("eventId")
