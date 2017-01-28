@@ -45,6 +45,9 @@ public class Attraction {
     @SerializedName("reviewStars")
     public float reviewStars;
 
+    @SerializedName("priceRange")
+    public String priceRange;
+
     @SerializedName("reviews")
     public List<AttractionReview> reviews;
 
@@ -61,12 +64,13 @@ public class Attraction {
       `source_url` varchar(254) NOT NULL DEFAULT '',
       `phone` varchar(254) DEFAULT NULL,
       `website` varchar(254) NOT NULL DEFAULT '',
+      `website` int(11) NULL DEFAULT ''
       PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
      */
     public PreparedStatement getSQLInsert(Connection connection) throws SQLException {
-        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         int i = 1;
         pst.setObject(++i, this.name);
         pst.setObject(++i, this.latitude);
@@ -78,6 +82,7 @@ public class Attraction {
         pst.setObject(++i, this.link);
         pst.setObject(++i, this.phone);
         pst.setObject(++i, this.website);
+        pst.setObject(++i, this.priceRange);
 
         return pst;
     }
