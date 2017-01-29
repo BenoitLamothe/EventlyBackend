@@ -2,7 +2,6 @@ package com.benoitlamothe.evently.miners;
 
 import com.benoitlamothe.evently.entity.Asset;
 import com.benoitlamothe.evently.entity.Attraction;
-import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.utils.CloudUtils;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -16,8 +15,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.LinkedList;
 
 /**

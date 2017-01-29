@@ -5,7 +5,6 @@ package com.benoitlamothe.evently.entity;
  */
 
 import com.google.gson.annotations.SerializedName;
-import sun.tools.tree.Statement;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

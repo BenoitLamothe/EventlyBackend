@@ -1,6 +1,5 @@
 package com.benoitlamothe.evently.utils;
 
-import com.benoitlamothe.evently.miners.TourismMiner;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;

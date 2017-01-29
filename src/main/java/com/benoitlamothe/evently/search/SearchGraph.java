@@ -2,21 +2,13 @@ package com.benoitlamothe.evently.search;
 
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
-import com.benoitlamothe.evently.entity.criterias.CategoriesCriteria;
 import com.benoitlamothe.evently.entity.criterias.ContentQualityCriteria;
-import com.benoitlamothe.evently.entity.criterias.EulerDistanceCriteria;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.benoitlamothe.evently.utils.GeoUtil;
-import com.sun.javafx.geom.Line2D;
-import com.sun.tools.doclint.HtmlTag;
-import com.sun.tools.internal.xjc.reader.gbind.Graph;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.joda.time.DateTime;
 
 import java.sql.SQLException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**

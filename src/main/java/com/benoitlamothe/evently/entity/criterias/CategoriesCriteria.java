@@ -1,16 +1,11 @@
 package com.benoitlamothe.evently.entity.criterias;
 
 import com.benoitlamothe.evently.entity.Attraction;
-import com.benoitlamothe.evently.search.GraphNode;
-import com.google.common.collect.Lists;
 import com.google.gson.*;
-import jdk.nashorn.internal.runtime.options.Option;
 
 import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**

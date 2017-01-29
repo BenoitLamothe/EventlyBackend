@@ -1,7 +1,6 @@
 package com.benoitlamothe.evently.miners;
 
 import com.benoitlamothe.evently.entity.Event;
-import com.google.gson.JsonObject;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.zaxxer.hikari.HikariConfig;

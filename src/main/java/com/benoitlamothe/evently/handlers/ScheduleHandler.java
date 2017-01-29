@@ -4,7 +4,7 @@ import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.Itinerary;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
-import com.benoitlamothe.evently.search.GraphNode;
+import com.benoitlamothe.evently.exception.EntityNotFoundException;
 import com.benoitlamothe.evently.search.SearchGraph;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
@@ -34,6 +34,10 @@ public class ScheduleHandler extends BaseHandler {
         Connection conn = this.dataSource.getConnection();
 
         Event event = Event.byID(conn, sr.eventId);
+
+        if(event == null) {
+            return new EntityNotFoundException();
+        }
 
         Map<Integer, Attraction> attractions = Attraction.getAttractions(conn)
                 .stream()

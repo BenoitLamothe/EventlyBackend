@@ -1,7 +1,6 @@
 package com.benoitlamothe.evently.entity.criterias;
 
 import com.benoitlamothe.evently.entity.Attraction;
-import com.benoitlamothe.evently.search.GraphNode;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;

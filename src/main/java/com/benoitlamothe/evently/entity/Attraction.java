@@ -2,16 +2,13 @@ package com.benoitlamothe.evently.entity;
 
 import com.google.gson.annotations.SerializedName;
 import com.mysql.cj.api.jdbc.Statement;
-import com.sun.tools.doclint.HtmlTag;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by olivier on 2017-01-28.

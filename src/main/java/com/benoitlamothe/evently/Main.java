@@ -5,19 +5,14 @@ import com.benoitlamothe.evently.handlers.EventsHandler;
 import com.benoitlamothe.evently.handlers.ScheduleHandler;
 import com.benoitlamothe.evently.utils.JsonTransformer;
 import com.google.auth.oauth2.ServiceAccountCredentials;
-import com.google.cloud.ExceptionHandler;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import com.google.gson.*;
-import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.GsonBuilder;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.text.DateFormat;
-import java.util.Date;
 
 import static spark.Spark.*;
 
@@ -61,7 +56,6 @@ public class Main {
             // Handle the exception here
             exception.printStackTrace();
         });
-
     }
 
     private static void enableCORS(final String origin, final String methods, final String headers) {

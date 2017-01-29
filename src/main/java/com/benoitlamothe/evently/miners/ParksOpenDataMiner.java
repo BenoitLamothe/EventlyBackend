@@ -1,8 +1,6 @@
 package com.benoitlamothe.evently.miners;
 
 import com.benoitlamothe.evently.entity.Attraction;
-import com.benoitlamothe.evently.entity.Event;
-import com.benoitlamothe.evently.utils.GeoUtil;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.zaxxer.hikari.HikariConfig;

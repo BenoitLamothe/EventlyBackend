@@ -1,7 +1,6 @@
 package com.benoitlamothe.evently.entity;
 
 import com.google.gson.annotations.SerializedName;
-import com.sun.tools.doclint.HtmlTag;
 
 import java.util.List;
 

@@ -3,7 +3,6 @@ package com.benoitlamothe.evently.miners;
 import com.benoitlamothe.evently.entity.Asset;
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.utils.CloudUtils;
-import com.google.gson.JsonObject;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -19,7 +18,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
-import java.util.stream.Collectors;
 
 /**
  * Created by jeremiep on 2017-01-28.
