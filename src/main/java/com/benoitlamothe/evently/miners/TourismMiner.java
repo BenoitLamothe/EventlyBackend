@@ -10,6 +10,7 @@ import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.*;
 import org.jsoup.safety.Cleaner;
@@ -72,6 +73,8 @@ public class TourismMiner {
                     }
                 }
             }
+
+            System.out.println("Inserted: " + event.name);
         }
     }
 
@@ -128,9 +131,9 @@ public class TourismMiner {
 
                     if (locationNode.isPresent()) {
                         e.location = sanitize(locationNode.get().nextSibling().toString());
-                        //GeoUtil.LatLong latlng = GeoUtil.getLatLong(e.location);
-                        //e.latitude = latlng.latitude;
-                        //e.longitude = latlng.longitude;
+                        GeoUtil.LatLong latlng = GeoUtil.getLatLong(e.location);
+                        e.latitude = latlng.latitude;
+                        e.longitude = latlng.longitude;
                     } else {
                         e.location = "";
                     }
@@ -221,6 +224,15 @@ public class TourismMiner {
                         }
                     }
 
+                    DateTime start = new DateTime(e.startTime);
+                    if(start.getHourOfDay() < 6) {
+                        e.startTime = start.plusHours(12).toDate();
+                    }
+
+                    DateTime end = new DateTime(e.endTime);
+                    if(end.getHourOfDay() < 6) {
+                        e.endTime = end.plusHours(12).toDate();
+                    }
 
                     e.imageSources = x.select("img")
                             .stream()
