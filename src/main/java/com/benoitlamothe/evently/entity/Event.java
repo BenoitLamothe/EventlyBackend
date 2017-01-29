@@ -5,13 +5,10 @@ package com.benoitlamothe.evently.entity;
  */
 
 import com.google.gson.annotations.SerializedName;
+import org.joda.time.DateTime;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class Event implements  ILocalizable {
@@ -32,10 +29,10 @@ public class Event implements  ILocalizable {
     public String location;
 
     @SerializedName("startTime")
-    public Date startTime;
+    public DateTime startTime;
 
     @SerializedName("endTime")
-    public Date endTime;
+    public DateTime endTime;
 
     @SerializedName("category")
     public String category;
@@ -90,8 +87,8 @@ public class Event implements  ILocalizable {
             e.latitude = rst.getFloat("loc_lat");
             e.longitude = rst.getFloat("loc_long");
             e.location = rst.getString("location");
-            e.startTime = rst.getDate("startDateTime");
-            e.endTime = rst.getDate("endDateTime");
+            e.startTime = new DateTime(rst.getDate("startDateTime"));
+            e.endTime = new DateTime(rst.getDate("endDateTime"));
             e.category = rst.getString("category");
             e.description = rst.getString("description");
             e.link = rst.getString("website");
@@ -130,8 +127,8 @@ public class Event implements  ILocalizable {
             e.latitude = rst.getFloat("loc_lat");
             e.longitude = rst.getFloat("loc_long");
             e.location = rst.getString("location");
-            e.startTime = rst.getDate("startDateTime");
-            e.endTime = rst.getDate("endDateTime");
+            e.startTime = new DateTime(rst.getDate("startDateTime"));
+            e.endTime = new DateTime(rst.getDate("endDateTime"));
             e.category = rst.getString("category");
             e.description = rst.getString("description");
             e.link = rst.getString("website");
