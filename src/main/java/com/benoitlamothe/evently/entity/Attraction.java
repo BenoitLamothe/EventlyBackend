@@ -1,6 +1,5 @@
 package com.benoitlamothe.evently.entity;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.mysql.cj.api.jdbc.Statement;
 

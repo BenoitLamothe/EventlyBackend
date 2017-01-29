@@ -3,7 +3,6 @@ package com.benoitlamothe.evently.handlers;
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.Itinerary;
-import com.benoitlamothe.evently.entity.criterias.RandomizationCriteria;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.benoitlamothe.evently.search.SearchGraph;
 import com.google.gson.Gson;

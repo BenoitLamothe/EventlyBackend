@@ -3,10 +3,8 @@ package com.benoitlamothe.evently.search;
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.criterias.ContentQualityCriteria;
-import com.benoitlamothe.evently.entity.criterias.RandomizationCriteria;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.benoitlamothe.evently.utils.GeoUtil;
-import com.sun.tools.doclint.HtmlTag;
 import org.joda.time.DateTime;
 
 import java.sql.SQLException;
