@@ -19,7 +19,7 @@ public class CategoriesCriteria extends ScheduleCriteria {
             public CategoriesCriteria deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
                 CategoriesCriteria criteria = new CategoriesCriteria();
                 criteria.categories = new LinkedList<String>();
-                for(JsonElement e : json.getAsJsonObject().getAsJsonArray("values")) {
+                for(JsonElement e : json.getAsJsonObject().getAsJsonArray("value")) {
                     criteria.categories.add(e.getAsString());
                 }
 

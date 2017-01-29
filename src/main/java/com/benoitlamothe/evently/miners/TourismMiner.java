@@ -173,6 +173,7 @@ public class TourismMiner {
                         Matcher fixedMatcher = p.matcher(hourRaw);
 
                         if(rangeMatcher.matches()) {
+                            System.out.println("Detected hour range: " + hourRaw);
                             Calendar cs = Calendar.getInstance();
                             cs.setTime(e.startTime);
 
