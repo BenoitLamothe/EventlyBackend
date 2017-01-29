@@ -64,6 +64,7 @@ public class YelpMiner {
         for(int i = 0; i < businesses.length(); i++) {
             JSONObject business = businesses.getJSONObject(i);
             JSONObject businessDetail = Unirest.get(URL_BUSINESS_API + business.getString("id")).asJson().getBody().getObject();
+            System.out.println(businessDetail);
 
             Attraction currentAttraction = new Attraction();
             currentAttraction.name = business.getString("name");
@@ -77,6 +78,7 @@ public class YelpMiner {
 
             currentAttraction.latitude = (float) business.getJSONObject("coordinates").getDouble("latitude");
             currentAttraction.longitude = (float) business.getJSONObject("coordinates").getDouble("longitude");
+            currentAttraction.hours = businessDetail.has("hours") ? this.getOpeningHours(businessDetail.getJSONArray("hours")) : "";
             currentAttraction.hoursShift = businessDetail.has("hours") ? this.determineHoursShift(businessDetail.getJSONArray("hours")) : 0;
             currentAttraction.description = "";
             currentAttraction.link = businessDetail.getString("url");
@@ -141,6 +143,16 @@ public class YelpMiner {
         }
 
         return finalShift;
+    }
+
+    private String getOpeningHours(JSONArray hours) {
+        for(int i = 0; i < hours.length(); i++) {
+            if(hours.getJSONObject(i).getString("hours_type").equalsIgnoreCase("REGULAR") &&
+                    hours.getJSONObject(i).has("open")) {
+                return hours.getJSONObject(i).getJSONArray("open").toString();
+            }
+        }
+        return "";
     }
 
     public static void main(String[] args) throws UnirestException, SQLException, IOException {
