@@ -2,6 +2,9 @@ group 'com.benoitlamothe'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = "com.benoitlamothe.evently.Main"
 
 sourceCompatibility = 1.8
 
