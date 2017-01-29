@@ -9,6 +9,8 @@ public class ScheduleCriteriaFactory {
     static ScheduleCriteria build(String name) {
         if(name.equalsIgnoreCase("categories")) {
             return new CategoriesCriteria();
+        } else if(name.equalsIgnoreCase("budget")) {
+            return new BudgetCriteria();
         }
 
         throw new NotImplementedException();

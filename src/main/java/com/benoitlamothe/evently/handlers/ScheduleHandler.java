@@ -21,7 +21,7 @@ public class ScheduleHandler extends BaseHandler {
     public Object handle(Request request, Response response) throws Exception {
         ScheduleRequest sr = this.serializer.fromJson(request.body(), ScheduleRequest.class);
 
-        return null;
+        return "";
     }
 
     public static class ScheduleRequest {
