@@ -167,23 +167,38 @@ public class SearchGraph {
     }
     */
 
-    public Collection<List<Attraction>> listPaths() {
+    public List<List<Attraction>> listPaths() {
         List<Attraction> sortedAttraction = attractions.values().stream().sorted((a, b) -> {
             Double positionFactor = GeoUtil.distance(this.event.latitude, a.latitude, this.event.longitude, a.longitude, 0, 0) - GeoUtil.distance(this.event.latitude, b.latitude, this.event.longitude, b.longitude, 0, 0);
             positionFactor += enabledCriterias.stream().map(x -> x.computeScrore(a, b)).reduce(0.0, (c, d) -> c + d);
             return positionFactor.intValue();
         }).collect(Collectors.toList());
 
-        List<List<Attraction>> ret = new LinkedList<>();
-        for(Attraction attraction : sortedAttraction.subList(0, 10)) {
-            ret.add(naive(attraction, ret.stream().flatMap(Collection::stream).collect(Collectors.toList()), -1));
-            ret.add(naive(attraction, ret.stream().flatMap(Collection::stream).collect(Collectors.toList()), 1));
+        Attraction attraction = sortedAttraction.get(0);
 
+        List<Attraction> before = naive(attraction, new ArrayList<>(), -1);
+        List<Attraction> after = naive(attraction, before, 1);
+
+
+        List<List<Attraction>> ret = new ArrayList<List<Attraction>>() {{
+            add(before);
+            add(after);
+        }};
+
+
+        //Debug
+        for (List<Attraction> path : ret) {
+            System.out.println("===============================");
+            for (Attraction a : path) {
+                System.out.println(a.name + " :" + GeoUtil.distance(this.event.latitude, a.latitude, this.event.longitude, a.longitude, 0, 0));
+            }
+            System.out.println("===============================");
         }
+        //
         return ret;
     }
 
-    public Optional<Integer> getBestAttractionFromCriterias(Attraction from, LinkedList<Attraction> scheduleSoFar) {
+    public Optional<Integer> getBestAttractionFromCriterias(Attraction from, List<Attraction> scheduleSoFar) {
         Collection<Integer> sortedAttraction = attractions.keySet().stream().sorted(new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
@@ -191,8 +206,8 @@ public class SearchGraph {
                 Attraction o2A = attractions.get(o2);
                 List<Double> o1AVal = enabledCriterias.stream().map(x -> x.computeScrore(from, o1A)).collect(Collectors.toList());
                 List<Double> o2AVal = enabledCriterias.stream().map(x -> x.computeScrore(from, o2A)).collect(Collectors.toList());
-                Optional<Double> o1Sum = o1AVal.stream().reduce((x, y)-> x + y);
-                Optional<Double> o2Sum = o2AVal.stream().reduce((x, y)-> x + y);
+                Optional<Double> o1Sum = o1AVal.stream().reduce((x, y) -> x + y);
+                Optional<Double> o2Sum = o2AVal.stream().reduce((x, y) -> x + y);
                 Double o1SSum = o1Sum.isPresent() ? o1Sum.get() : 0.0;
                 Double o2SSum = o2Sum.isPresent() ? o2Sum.get() : 0.0;
 
@@ -206,24 +221,27 @@ public class SearchGraph {
         return bestAttrId;
     }
 
-    public List<Attraction> naive(Attraction fromAttraction, List<Attraction> excluded, int factor) {
+    public List<Attraction> naive(Attraction fromAttraction, List<Attraction> exclusions, int factor) {
         DateTime currentTime = factor > 0 ? new DateTime(this.event.endTime) : new DateTime(this.event.startTime);
         DateTime limitTime = factor > 0 ? this.higherBound : this.lowerBound;
         int timeIncrementFactor = -1;
         boolean keepOnGoing = true;
         LinkedList<Attraction> currentAttractionSet = new LinkedList<>();
 
-        while(keepOnGoing) {
+        while (keepOnGoing) {
             LinkedList<Attraction> temp = new LinkedList<>();
-            temp.addAll(excluded);
+            temp.addAll(exclusions);
             temp.addAll(currentAttractionSet);
+            temp.addAll(this.computeExclusions(currentAttractionSet));
             Optional<Integer> addAttractionOpt = this.getBestAttractionFromCriterias(fromAttraction, temp);
-            if(!addAttractionOpt.isPresent()) { break; }
+            if (!addAttractionOpt.isPresent()) {
+                break;
+            }
             Attraction addAttraction = attractions.get(addAttractionOpt.get());
             currentAttractionSet.add(addAttraction);
 
             keepOnGoing = timeIncrementFactor < 0 ? currentTime.isAfter(limitTime) : currentTime.isBefore(limitTime);
-            if(timeIncrementFactor > 0) {
+            if (timeIncrementFactor > 0) {
                 currentTime = currentTime.plusMinutes(addAttraction.duration);
             } else {
                 currentTime = currentTime.minusMinutes(addAttraction.duration);
@@ -232,4 +250,21 @@ public class SearchGraph {
         return currentAttractionSet;
     }
 
+    public List<Attraction> computeExclusions(List<Attraction> current) {
+        List<Attraction> exclusions = new LinkedList<>();
+
+        if(current.stream().filter(Attraction::isRestaurant).count() >= 1) {
+            exclusions.addAll(this.attractions.values().stream().filter(Attraction::isRestaurant).collect(Collectors.toList()));
+        }
+
+        if(current.stream().filter(Attraction::isHotel).count() >= 1) {
+            exclusions.addAll(this.attractions.values().stream().filter(Attraction::isHotel).collect(Collectors.toList()));
+        }
+
+        if(current.stream().filter(Attraction::isPark).count() >= 1) {
+            exclusions.addAll(this.attractions.values().stream().filter(Attraction::isPark).collect(Collectors.toList()));
+        }
+
+        return exclusions;
+    }
 }
