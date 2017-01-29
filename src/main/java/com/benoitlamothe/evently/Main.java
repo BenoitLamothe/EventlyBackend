@@ -7,11 +7,15 @@ import com.benoitlamothe.evently.utils.JsonTransformer;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 import static spark.Spark.*;
 
@@ -42,6 +46,19 @@ public class Main {
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(ScheduleCriteria.class, ScheduleCriteria.getCriteriasDeserializer());
         builder.registerTypeAdapter(ScheduleCriteria.class, ScheduleCriteria.getCriteriasSerializer());
+        builder.registerTypeAdapter(DateTime.class, new JsonDeserializer<DateTime>() {
+            @Override
+            public DateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                // Do not try to deserialize null or empty values
+                if (json.getAsString() == null || json.getAsString().isEmpty())
+                {
+                    return null;
+                }
+
+                final DateTimeFormatter fmt = ISODateTimeFormat.dateTimeParser();
+                return fmt.parseDateTime(json.getAsString());
+            }
+        });
 
         builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 

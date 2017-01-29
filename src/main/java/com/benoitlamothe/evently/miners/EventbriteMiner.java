@@ -58,8 +58,8 @@ public class EventbriteMiner {
             Event evt = new Event();
             if(!eventObj.has("name")) { continue; }
             evt.name = eventObj.getJSONObject("name").getString("text");
-            evt.startTime = DateTime.parse(eventObj.getJSONObject("start").getString("local")).toDate();
-            evt.endTime = DateTime.parse(eventObj.getJSONObject("end").getString("local")).toDate();
+            evt.startTime = DateTime.parse(eventObj.getJSONObject("start").getString("local"));
+            evt.endTime = DateTime.parse(eventObj.getJSONObject("end").getString("local"));
             evt.location = eventVenue.getJSONObject("address").getString("localized_address_display");
 
             if(eventObj.has("description")) {
