@@ -56,7 +56,7 @@ public class CategoriesCriteria extends ScheduleCriteria {
         Optional<Integer> found = categoriesFound.stream().reduce((x, y) -> x + y);
 
         if(!found.isPresent()) {
-            return 0.0;
+            return -Integer.MAX_VALUE;
         }
 
         return found.get() * 100;
