@@ -1,5 +1,6 @@
 package com.benoitlamothe.evently.entity.criterias;
 
+import com.benoitlamothe.evently.search.GraphNode;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
@@ -28,5 +29,10 @@ public class BudgetCriteria extends ScheduleCriteria {
         serialized.add("name", new JsonPrimitive("categories"));
         serialized.add("value", new JsonPrimitive(this.value));
         return serialized;
+    }
+
+    @Override
+    public double computeScrore(GraphNode from, GraphNode to) {
+        return 0.0;
     }
 }

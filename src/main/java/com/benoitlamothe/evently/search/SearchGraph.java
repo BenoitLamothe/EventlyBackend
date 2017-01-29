@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
  * Created by jeremiep on 2017-01-28.
  */
 public class SearchGraph {
+    private static final int GRAPH_FAN = 10;
     private Connection dbConn;
     private List<ScheduleCriteria> enabledCriterias;
     private HashMap<Integer, Attraction> loadedAttractions = new HashMap<Integer, Attraction>();
@@ -52,8 +53,9 @@ public class SearchGraph {
                 }
 
                 List<Integer> toBeExploredCopy = toBeExplored.stream().filter(u -> !u.equals(id)).collect(Collectors.toList());
+                toBeExploredCopy = this.getBestPromising(GRAPH_FAN, toBeExploredCopy, currentNode);
                 if(toBeExploredCopy.size() != toBeExplored.size()-1) {
-                    throw new RuntimeException();
+//                    throw new RuntimeException();
                 }
 
                 getSubtree(node,
@@ -67,6 +69,7 @@ public class SearchGraph {
 
     public List<GraphNode> generateSearchTree(Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor) {
         List<GraphNode> nodes = new LinkedList<>();
+        toBeExplored = this.getBestPromising(GRAPH_FAN, toBeExplored, new GraphNode());
         for (Integer id : toBeExplored) {
             GraphNode node = new GraphNode();
             node.data = loadedAttractions.get(id);
@@ -74,7 +77,7 @@ public class SearchGraph {
 
             DateTime nextDate = incrementFactor > 0 ? currentTime.plusMinutes(loadedAttractions.get(id).duration) : currentTime.minusMinutes(loadedAttractions.get(id).duration);
             List<Integer> toBeExploredCopy = toBeExplored.stream().filter(u -> !u.equals(id)).collect(Collectors.toList());
-
+            toBeExploredCopy = this.getBestPromising(GRAPH_FAN, toBeExploredCopy, node);
             getSubtree(node,
                     toBeExploredCopy,
                     nextDate,
@@ -82,6 +85,38 @@ public class SearchGraph {
                     incrementFactor);
         }
         return nodes;
+    }
+
+    private List<Integer> getBestPromising(int x, Collection<Integer> ints, GraphNode currentNode) {
+        LinkedList<Integer> result = new LinkedList<>();
+        PriorityQueue<Integer> toBeExploredSorted = new PriorityQueue<>(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                GraphNode o1Node = new GraphNode();
+                GraphNode o2Node = new GraphNode();
+
+                o1Node.data = loadedAttractions.get(o1);
+                o2Node.data = loadedAttractions.get(o2);
+                return computeScore(currentNode, o1Node).compareTo(computeScore(currentNode, o2Node));
+            }
+        });
+        ints.forEach(toBeExploredSorted::add);
+        for(int i = 0 ; i < x; i++) {
+            if(toBeExploredSorted.isEmpty()) {
+                break;
+            }
+
+            result.add(toBeExploredSorted.remove());
+        }
+
+        return result;
+    }
+
+    public Double computeScore(GraphNode from, GraphNode to) {
+        //List<Double> mm = this.enabledCriterias.stream().map(x -> x.computeScrore(from, to)).collect(Collectors.toList());
+        //return mm.stream().reduce((x, y) -> x + y).get();
+
+        return 100.0;
     }
 
     public static void main(String[] args) throws SQLException {
@@ -97,7 +132,7 @@ public class SearchGraph {
         List<GraphNode> graph = g.generateSearchTree(
                 g.loadedAttractions.keySet(),
                 DateTime.now(),
-                DateTime.now().plusMinutes(-4 * 60),
+                DateTime.now().minusMinutes(4 * 60),
                 -1);
         System.out.println("Generated!!");
     }
