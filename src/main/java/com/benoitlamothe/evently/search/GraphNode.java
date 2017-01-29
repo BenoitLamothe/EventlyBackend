@@ -13,7 +13,7 @@ public class GraphNode {
     List<GraphNode> children = new LinkedList<>();
     EndpointType currentType = EndpointType.NORMAL;
 
-    enum EndpointType {
+    public enum EndpointType {
         START, END, NORMAL
     }
 
@@ -21,4 +21,7 @@ public class GraphNode {
         return this.currentType;
     }
 
+    public Attraction getAttraction() {
+        return this.data;
+    }
 }
