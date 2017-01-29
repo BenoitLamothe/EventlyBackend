@@ -11,11 +11,13 @@ import com.google.gson.*;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.TimeZone;
 
 import static spark.Spark.*;
 
@@ -36,6 +38,7 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        DateTimeZone.setDefault(DateTimeZone.forTimeZone(TimeZone.getTimeZone("America/New_York")));
     }
 
     public static void main(String[] args) {
