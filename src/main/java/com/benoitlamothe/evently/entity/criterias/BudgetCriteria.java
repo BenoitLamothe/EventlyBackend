@@ -1,5 +1,6 @@
 package com.benoitlamothe.evently.entity.criterias;
 
+import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.search.GraphNode;
 import com.google.gson.*;
 
@@ -32,7 +33,7 @@ public class BudgetCriteria extends ScheduleCriteria {
     }
 
     @Override
-    public double computeScrore(GraphNode from, GraphNode to) {
+    public double computeScrore(Attraction from, Attraction to) {
         return 0.0;
     }
 }

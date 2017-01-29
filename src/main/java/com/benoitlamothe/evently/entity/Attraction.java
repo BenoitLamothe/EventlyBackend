@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by olivier on 2017-01-28.
  */
-public class Attraction {
+public class Attraction implements ILocalizable {
     @SerializedName("id")
     public int id;
 
@@ -132,5 +132,20 @@ public class Attraction {
         }
 
         return result;
+    }
+
+    @Override
+    public int getId() {
+        return this.id;
+    }
+
+    @Override
+    public double getLat() {
+        return this.latitude;
+    }
+
+    @Override
+    public double getLong() {
+        return this.longitude;
     }
 }

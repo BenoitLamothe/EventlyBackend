@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Event {
+public class Event implements  ILocalizable {
 
     @SerializedName("id")
     public int id;
@@ -147,5 +147,20 @@ public class Event {
         }
 
         return events;
+    }
+
+    @Override
+    public int getId() {
+        return this.id;
+    }
+
+    @Override
+    public double getLat() {
+        return this.latitude;
+    }
+
+    @Override
+    public double getLong() {
+        return this.longitude;
     }
 }

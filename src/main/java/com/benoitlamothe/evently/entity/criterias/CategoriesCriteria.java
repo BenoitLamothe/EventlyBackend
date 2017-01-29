@@ -1,5 +1,6 @@
 package com.benoitlamothe.evently.entity.criterias;
 
+import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.search.GraphNode;
 import com.google.common.collect.Lists;
 import com.google.gson.*;
@@ -10,12 +11,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by jeremiep on 2017-01-28.
  */
 public class CategoriesCriteria extends ScheduleCriteria {
-    private List<String> categories;
+    public List<String> categories = new LinkedList<>();
 
     @Override
     JsonDeserializer<? extends ScheduleCriteria> deserializer() {
@@ -45,20 +47,16 @@ public class CategoriesCriteria extends ScheduleCriteria {
     }
 
     @Override
-    public double computeScrore(GraphNode from, GraphNode to) {
-        if(!isValidNode(from) || !isValidNode(to)) {
-            return 0.0;
-        }
+    public double computeScrore(Attraction from, Attraction to) {
+        int fromScore = Stream.of(from.categories.split(","))
+                .map(x -> this.categories.contains(x) ? 1 : 0)
+                .reduce(0, (x, y) -> x + y);
 
-        String[] cat = to.getAttraction().categories.split(",");
-        List<String> categories = Lists.newArrayList(cat);
-        List<Integer> categoriesFound = categories.stream().map(x -> this.categories.contains(x) ? 1 : 0).collect(Collectors.toList());
-        Optional<Integer> found = categoriesFound.stream().reduce((x, y) -> x + y);
+        int toScore = Stream.of(to.categories.split(","))
+                .map(x -> this.categories.contains(x) ? 1 : 0)
+                .reduce(0, (x, y) -> x + y);
 
-        if(!found.isPresent()) {
-            return -Integer.MAX_VALUE;
-        }
 
-        return found.get() * 100;
+        return fromScore - toScore;
     }
 }

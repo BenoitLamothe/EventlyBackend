@@ -2,9 +2,11 @@ package com.benoitlamothe.evently.search;
 
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
+import com.benoitlamothe.evently.entity.criterias.CategoriesCriteria;
 import com.benoitlamothe.evently.entity.criterias.EulerDistanceCriteria;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.sun.javafx.geom.Line2D;
+import com.sun.tools.doclint.HtmlTag;
 import com.sun.tools.internal.xjc.reader.gbind.Graph;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -35,7 +37,7 @@ public class SearchGraph {
         this.attractions = attractions;
     }
 
-    public void getSubtree(GraphNode currentNode, Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor, int level) {
+    /*public void getSubtree(GraphNode currentNode, Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor, int level) {
         if ((incrementFactor > 0 && currentTime.isAfter(timeLimit)) || (incrementFactor < 0 && currentTime.isBefore(timeLimit)) || currentTime.isEqual(timeLimit)) {
             GraphNode endNode = new GraphNode();
             endNode.currentType = GraphNode.EndpointType.END;
@@ -57,9 +59,6 @@ public class SearchGraph {
 
                 List<Integer> toBeExploredCopy = toBeExplored.stream().filter(u -> !u.equals(id)).collect(Collectors.toList());
                 toBeExploredCopy = this.getBestPromising(GRAPH_FAN * (level <= 0 ? 1 : level), toBeExploredCopy, currentNode);
-                if (toBeExploredCopy.size() != toBeExplored.size() - 1) {
-//                    throw new RuntimeException();
-                }
 
                 getSubtree(node,
                         toBeExploredCopy,
@@ -71,9 +70,9 @@ public class SearchGraph {
         }
     }
 
-    public List<GraphNode> generateSearchTree(Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor, int estLevel) {
+    public List<GraphNode> generateSearchTree(Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor, int estLevel, GraphNode start) {
         List<GraphNode> nodes = new LinkedList<>();
-        toBeExplored = this.getBestPromising(GRAPH_FAN * (estLevel <= 0 ? 1 : estLevel), toBeExplored, new GraphNode());
+        toBeExplored = this.getBestPromising(GRAPH_FAN * (estLevel <= 0 ? 1 : estLevel), toBeExplored, start);
         for (Integer id : toBeExplored) {
             GraphNode node = new GraphNode();
             node.data = attractions.get(id);
@@ -125,13 +124,15 @@ public class SearchGraph {
 
     public void generateGraph() {
         GraphNode startNode = new GraphNode();
+        startNode.data = this.event;
         startNode.currentType = GraphNode.EndpointType.START;
         startNode.children.addAll(this.generateSearchTree(
                 this.attractions.keySet(),
                 DateTime.now(),
                 DateTime.now().minusMinutes(4 * 60),
                 -1,
-                4));
+                4,
+                startNode));
 
         this.generatedStartNode = startNode;
     }
@@ -146,9 +147,9 @@ public class SearchGraph {
             children.sort(new Comparator<GraphNode>() {
                 @Override
                 public int compare(GraphNode o1, GraphNode o2) {
-                    if(excluded.contains(o1.data.id)) {
+                    if(excluded.contains(o1.data.getId())) {
                         return -1;
-                    } else if(excluded.contains(o2.data.id)) {
+                    } else if(excluded.contains(o2.data.getId())) {
                         return 1;
                     } else {
                         return computeScore(currentNode, o1).compareTo(computeScore(currentNode, o2));
@@ -170,10 +171,57 @@ public class SearchGraph {
         for(GraphNode c : this.generatedStartNode.children) {
             List<GraphNode> nodes = this.listPath(new LinkedList<>(), c, excludedNodes);
             paths.add(nodes);
-            excludedNodes.addAll(nodes.stream().map(x -> x.data.id).collect(Collectors.toList()));
+            excludedNodes.addAll(nodes.stream().map(x -> x.data.getId()).collect(Collectors.toList()));
         }
 
         return paths;
+    }
+*/
+    public Optional<Integer> getBestAttractionFromCriterias(Attraction from, LinkedList<Attraction> scheduleSoFar) {
+        Collection<Integer> sortedAttraction = attractions.keySet().stream().sorted(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                Attraction o1A = attractions.get(o1);
+                Attraction o2A = attractions.get(o2);
+                List<Double> o1AVal = enabledCriterias.stream().map(x -> x.computeScrore(from, o1A)).collect(Collectors.toList());
+                List<Double> o2AVal = enabledCriterias.stream().map(x -> x.computeScrore(from, o2A)).collect(Collectors.toList());
+                Optional<Double> o1Sum = o1AVal.stream().reduce((x, y)-> x + y);
+                Optional<Double> o2Sum = o2AVal.stream().reduce((x, y)-> x + y);
+                Double o1SSum = o1Sum.isPresent() ? o1Sum.get() : 0.0;
+                Double o2SSum = o2Sum.isPresent() ? o2Sum.get() : 0.0;
+
+                return o1SSum.compareTo(o2SSum);
+            }
+        }).collect(Collectors.toList());
+
+        List<Integer> attractionIdSoFar = scheduleSoFar.stream().map(x -> x.id).collect(Collectors.toList());
+        sortedAttraction = sortedAttraction.stream().filter(x -> !attractionIdSoFar.contains(x)).collect(Collectors.toList());
+        Optional<Integer> bestAttrId = sortedAttraction.stream().findFirst();
+        return bestAttrId;
+    }
+
+    public void naive() {
+        DateTime currentTime = DateTime.now();
+        DateTime limitTime = currentTime.minusHours(4);
+        int timeIncrementFactor = -1;
+        boolean keepOnGoing = true;
+        Attraction fromAttraction = null;
+        LinkedList<Attraction> currentAttractionSet = new LinkedList<>();
+        while(keepOnGoing) {
+            Optional<Integer> addAttractionOpt = this.getBestAttractionFromCriterias(fromAttraction, currentAttractionSet);
+            if(!addAttractionOpt.isPresent()) { break; }
+            Attraction addAttraction = attractions.get(addAttractionOpt.get());
+            currentAttractionSet.add(addAttraction);
+
+            keepOnGoing = timeIncrementFactor < 0 ? currentTime.isAfter(limitTime) : currentTime.isBefore(limitTime);
+            if(timeIncrementFactor > 0) {
+                currentTime = currentTime.plusMinutes(addAttraction.duration);
+            } else {
+                currentTime = currentTime.minusMinutes(addAttraction.duration);
+            }
+        }
+
+        System.out.print(currentAttractionSet.size());
     }
 
     public static void main(String[] args) throws SQLException {
@@ -184,10 +232,13 @@ public class SearchGraph {
                 .stream()
                 .collect(Collectors.toMap(Attraction::getID, Function.identity()));
         SearchGraph g = new SearchGraph(null, attractions, new LinkedList<ScheduleCriteria>(), DateTime.now(), DateTime.now().plusHours(3));
-        g.enabledCriterias.add(new EulerDistanceCriteria());
-        g.generateGraph();
-        Collection<List<GraphNode>> paths = g.listPaths();
+        CategoriesCriteria crit = new CategoriesCriteria();
+        crit.categories.add("Sport");
 
+        g.enabledCriterias.add(new EulerDistanceCriteria());
+        g.enabledCriterias.add(crit);
+
+        g.naive();
         System.out.print("test");
     }
 }

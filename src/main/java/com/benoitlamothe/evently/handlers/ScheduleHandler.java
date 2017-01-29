@@ -48,13 +48,13 @@ public class ScheduleHandler extends BaseHandler {
 
         Itinerary itinerary = new Itinerary();
         itinerary.event = event;
-        itinerary.attractions = graph.listPaths()
+        /*itinerary.attractions = graph.listPaths()
                 .stream()
                 .map(x -> x.stream()
                         .filter(y -> y.getType() == GraphNode.EndpointType.NORMAL)
                         .map(GraphNode::getAttraction)
                         .collect(Collectors.toList())
-                ).collect(Collectors.toList());
+                ).collect(Collectors.toList());*/
 
         return itinerary;
     }

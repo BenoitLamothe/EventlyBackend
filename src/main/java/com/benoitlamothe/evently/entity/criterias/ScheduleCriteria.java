@@ -1,5 +1,6 @@
 package com.benoitlamothe.evently.entity.criterias;
 
+import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.search.GraphNode;
 import com.google.api.client.json.Json;
 import com.google.gson.*;
@@ -13,7 +14,7 @@ public abstract class ScheduleCriteria {
 
     abstract JsonDeserializer<? extends ScheduleCriteria> deserializer();
     abstract JsonObject serializer();
-    public abstract double computeScrore(GraphNode from, GraphNode to);
+    public abstract double computeScrore(Attraction from, Attraction to);
 
     public static JsonSerializer<ScheduleCriteria> getCriteriasSerializer() {
         return new JsonSerializer<ScheduleCriteria>() {
