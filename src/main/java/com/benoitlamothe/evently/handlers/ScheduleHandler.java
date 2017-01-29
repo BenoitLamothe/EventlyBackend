@@ -2,7 +2,9 @@ package com.benoitlamothe.evently.handlers;
 
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
+import com.benoitlamothe.evently.entity.Itinerary;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
+import com.benoitlamothe.evently.search.GraphNode;
 import com.benoitlamothe.evently.search.SearchGraph;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
@@ -37,15 +39,24 @@ public class ScheduleHandler extends BaseHandler {
                 .stream()
                 .collect(Collectors.toMap(Attraction::getID, Function.identity()));
 
+        conn.close();
+
         DateTime lowerBound = sr.getAvailabilityLowerBound(event);
         DateTime higherBound = sr.getAvailabilityHigherBound(event);
 
-
         SearchGraph graph = new SearchGraph(event, attractions, sr.criterias, lowerBound, higherBound);
 
-        conn.close();
+        Itinerary itinerary = new Itinerary();
+        itinerary.event = event;
+        itinerary.attractions = graph.listPaths()
+                .stream()
+                .map(x -> x.stream()
+                        .filter(y -> y.getType() == GraphNode.EndpointType.NORMAL)
+                        .map(GraphNode::getAttraction)
+                        .collect(Collectors.toList())
+                ).collect(Collectors.toList());
 
-        return "";
+        return itinerary;
     }
 
     public static class ScheduleRequest {
