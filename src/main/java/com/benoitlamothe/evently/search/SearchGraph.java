@@ -135,7 +135,7 @@ public class SearchGraph {
     public List<Attraction> computeExclusions(List<Attraction> current) {
         List<Attraction> exclusions = new LinkedList<>();
 
-        if (current.stream().filter(Attraction::isRestaurant).count() >= 2) {
+        if (current.stream().filter(Attraction::isRestaurant).count() >= 1) {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isRestaurant).collect(Collectors.toList()));
         }
 
@@ -143,11 +143,11 @@ public class SearchGraph {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isHotel).collect(Collectors.toList()));
         }
 
-        if (current.stream().filter(Attraction::isPark).count() >= 3) {
+        if (current.stream().filter(Attraction::isPark).count() >= 2) {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isPark).collect(Collectors.toList()));
         }
 
-        if (current.stream().filter(Attraction::isHeritage).count() >= 3) {
+        if (current.stream().filter(Attraction::isHeritage).count() >= 2) {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isHeritage).collect(Collectors.toList()));
         }
 
