@@ -34,7 +34,7 @@ public class SearchGraph {
         this.attractions = attractions;
     }
 
-    public void getSubtree(GraphNode currentNode, Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor) {
+    public void getSubtree(GraphNode currentNode, Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor, int level) {
         if ((incrementFactor > 0 && currentTime.isAfter(timeLimit)) || (incrementFactor < 0 && currentTime.isBefore(timeLimit)) || currentTime.isEqual(timeLimit)) {
             GraphNode endNode = new GraphNode();
             endNode.currentType = GraphNode.EndpointType.END;
@@ -55,7 +55,7 @@ public class SearchGraph {
                 }
 
                 List<Integer> toBeExploredCopy = toBeExplored.stream().filter(u -> !u.equals(id)).collect(Collectors.toList());
-                toBeExploredCopy = this.getBestPromising(GRAPH_FAN, toBeExploredCopy, currentNode);
+                toBeExploredCopy = this.getBestPromising(GRAPH_FAN * (level <= 0 ? 1 : level), toBeExploredCopy, currentNode);
                 if (toBeExploredCopy.size() != toBeExplored.size() - 1) {
 //                    throw new RuntimeException();
                 }
@@ -64,14 +64,15 @@ public class SearchGraph {
                         toBeExploredCopy,
                         nextDate,
                         timeLimit,
-                        incrementFactor);
+                        incrementFactor,
+                        level--);
             }
         }
     }
 
-    public List<GraphNode> generateSearchTree(Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor) {
+    public List<GraphNode> generateSearchTree(Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor, int estLevel) {
         List<GraphNode> nodes = new LinkedList<>();
-        toBeExplored = this.getBestPromising(GRAPH_FAN, toBeExplored, new GraphNode());
+        toBeExplored = this.getBestPromising(GRAPH_FAN * (estLevel <= 0 ? 1 : estLevel), toBeExplored, new GraphNode());
         for (Integer id : toBeExplored) {
             GraphNode node = new GraphNode();
             node.data = attractions.get(id);
@@ -79,12 +80,13 @@ public class SearchGraph {
 
             DateTime nextDate = incrementFactor > 0 ? currentTime.plusMinutes(attractions.get(id).duration) : currentTime.minusMinutes(attractions.get(id).duration);
             List<Integer> toBeExploredCopy = toBeExplored.stream().filter(u -> !u.equals(id)).collect(Collectors.toList());
-            toBeExploredCopy = this.getBestPromising(GRAPH_FAN, toBeExploredCopy, node);
+            toBeExploredCopy = this.getBestPromising(GRAPH_FAN * (estLevel <= 0 ? 1 : estLevel), toBeExploredCopy, node);
             getSubtree(node,
                     toBeExploredCopy,
                     nextDate,
                     timeLimit,
-                    incrementFactor);
+                    incrementFactor,
+                    estLevel--);
         }
         return nodes;
     }
@@ -127,12 +129,13 @@ public class SearchGraph {
                 this.attractions.keySet(),
                 DateTime.now(),
                 DateTime.now().minusMinutes(4 * 60),
-                -1));
+                -1,
+                4));
 
         this.generatedStartNode = startNode;
     }
 
-    public List<GraphNode> listPath(LinkedList<GraphNode> acc, GraphNode currentNode, LinkedList<GraphNode> excluded) {
+    public List<GraphNode> listPath(LinkedList<GraphNode> acc, GraphNode currentNode, LinkedList<Integer> excluded) {
         if(currentNode.currentType == GraphNode.EndpointType.END) {
             return acc;
         } else {
@@ -142,7 +145,13 @@ public class SearchGraph {
             children.sort(new Comparator<GraphNode>() {
                 @Override
                 public int compare(GraphNode o1, GraphNode o2) {
-                    return computeScore(currentNode, o1).compareTo(computeScore(currentNode, o2));
+                    if(excluded.contains(o1.data.id)) {
+                        return -1;
+                    } else if(excluded.contains(o2.data.id)) {
+                        return 1;
+                    } else {
+                        return computeScore(currentNode, o1).compareTo(computeScore(currentNode, o2));
+                    }
                 }
             });
             Optional<GraphNode> optimalChild = children.stream().findFirst();
@@ -156,11 +165,11 @@ public class SearchGraph {
 
     public Collection<List<GraphNode>> listPaths() {
         Collection<List<GraphNode>> paths = new ArrayList<>();
-        LinkedList<GraphNode> excludedNodes = new LinkedList<>();
+        LinkedList<Integer> excludedNodes = new LinkedList<>();
         for(GraphNode c : this.generatedStartNode.children) {
             List<GraphNode> nodes = this.listPath(new LinkedList<>(), c, excludedNodes);
             paths.add(nodes);
-            excludedNodes.addAll(nodes);
+            excludedNodes.addAll(nodes.stream().map(x -> x.data.id).collect(Collectors.toList()));
         }
 
         return paths;
