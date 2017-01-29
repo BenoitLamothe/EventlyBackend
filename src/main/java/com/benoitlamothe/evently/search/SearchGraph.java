@@ -5,6 +5,7 @@ import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.criterias.CategoriesCriteria;
 import com.benoitlamothe.evently.entity.criterias.EulerDistanceCriteria;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
+import com.benoitlamothe.evently.utils.GeoUtil;
 import com.sun.javafx.geom.Line2D;
 import com.sun.tools.doclint.HtmlTag;
 import com.sun.tools.internal.xjc.reader.gbind.Graph;
@@ -164,19 +165,22 @@ public class SearchGraph {
             return listPath(acc, optimalChild.get(), excluded);
         }
     }
+    */
 
-    public Collection<List<GraphNode>> listPaths() {
-        Collection<List<GraphNode>> paths = new ArrayList<>();
-        LinkedList<Integer> excludedNodes = new LinkedList<>();
-        for(GraphNode c : this.generatedStartNode.children) {
-            List<GraphNode> nodes = this.listPath(new LinkedList<>(), c, excludedNodes);
-            paths.add(nodes);
-            excludedNodes.addAll(nodes.stream().map(x -> x.data.getId()).collect(Collectors.toList()));
-        }
+    public Collection<List<Attraction>> listPaths() {
+        List<Attraction> sortedAttraction = attractions.values().stream().sorted((a, b) -> {
+            Double positionFactor = GeoUtil.distance(this.event.latitude, a.latitude, this.event.longitude, a.longitude, 0, 0) - GeoUtil.distance(this.event.latitude, b.latitude, this.event.longitude, b.longitude, 0, 0);
+            positionFactor += enabledCriterias.stream().map(x -> x.computeScrore(a, b)).reduce(0.0, (c, d) -> c + d);
+            return positionFactor.intValue();
+        }).collect(Collectors.toList());
 
-        return paths;
+        return sortedAttraction
+                .stream()
+                .limit(10)
+                .map(this::naive)
+                .collect(Collectors.toList());
     }
-*/
+
     public Optional<Integer> getBestAttractionFromCriterias(Attraction from, LinkedList<Attraction> scheduleSoFar) {
         Collection<Integer> sortedAttraction = attractions.keySet().stream().sorted(new Comparator<Integer>() {
             @Override
@@ -200,12 +204,11 @@ public class SearchGraph {
         return bestAttrId;
     }
 
-    public void naive() {
+    public List<Attraction>  naive(Attraction fromAttraction) {
         DateTime currentTime = DateTime.now();
         DateTime limitTime = currentTime.minusHours(4);
         int timeIncrementFactor = -1;
         boolean keepOnGoing = true;
-        Attraction fromAttraction = null;
         LinkedList<Attraction> currentAttractionSet = new LinkedList<>();
         while(keepOnGoing) {
             Optional<Integer> addAttractionOpt = this.getBestAttractionFromCriterias(fromAttraction, currentAttractionSet);
@@ -220,25 +223,7 @@ public class SearchGraph {
                 currentTime = currentTime.minusMinutes(addAttraction.duration);
             }
         }
-
-        System.out.print(currentAttractionSet.size());
+        return currentAttractionSet;
     }
 
-    public static void main(String[] args) throws SQLException {
-        final HikariConfig config = new HikariConfig("/hikari.properties");
-        final HikariDataSource ds = new HikariDataSource(config);
-
-        Map<Integer, Attraction> attractions = Attraction.getAttractions(ds.getConnection())
-                .stream()
-                .collect(Collectors.toMap(Attraction::getID, Function.identity()));
-        SearchGraph g = new SearchGraph(null, attractions, new LinkedList<ScheduleCriteria>(), DateTime.now(), DateTime.now().plusHours(3));
-        CategoriesCriteria crit = new CategoriesCriteria();
-        crit.categories.add("Sport");
-
-        g.enabledCriterias.add(new EulerDistanceCriteria());
-        g.enabledCriterias.add(crit);
-
-        g.naive();
-        System.out.print("test");
-    }
 }

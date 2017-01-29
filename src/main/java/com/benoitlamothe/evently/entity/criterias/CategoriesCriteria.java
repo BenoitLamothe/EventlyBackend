@@ -26,7 +26,7 @@ public class CategoriesCriteria extends ScheduleCriteria {
             public CategoriesCriteria deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
                 CategoriesCriteria criteria = new CategoriesCriteria();
                 criteria.categories = new LinkedList<String>();
-                for(JsonElement e : json.getAsJsonObject().getAsJsonArray("value")) {
+                for (JsonElement e : json.getAsJsonObject().getAsJsonArray("value")) {
                     criteria.categories.add(e.getAsString());
                 }
 
@@ -55,7 +55,6 @@ public class CategoriesCriteria extends ScheduleCriteria {
         int toScore = Stream.of(to.categories.split(","))
                 .map(x -> this.categories.contains(x) ? 1 : 0)
                 .reduce(0, (x, y) -> x + y);
-
 
         return fromScore - toScore;
     }

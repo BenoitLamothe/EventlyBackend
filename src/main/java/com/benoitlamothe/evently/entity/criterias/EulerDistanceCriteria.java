@@ -22,16 +22,8 @@ public class EulerDistanceCriteria extends ScheduleCriteria {
 
     @Override
     public double computeScrore(Attraction from, Attraction to) {
-        /*if(from.getType() != GraphNode.EndpointType.NORMAL || to.getType() != GraphNode.EndpointType.NORMAL) {
-            return 0.0;
-        }
 
-        if(from.getAttraction() == null || to.getAttraction() == null) {
-            return 0.0;
-        }
-
-        return -1 * GeoUtil.distance(from.getAttraction().latitude, to.getAttraction().latitude,
-                                from.getAttraction().longitude, to.getAttraction().longitude, 0, 0);*/
-        return 0.0;
+        return -1 * GeoUtil.distance(from.latitude, to.latitude,
+                from.longitude, to.longitude, 0, 0);
     }
 }

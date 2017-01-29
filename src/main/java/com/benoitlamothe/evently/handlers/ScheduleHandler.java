@@ -45,17 +45,14 @@ public class ScheduleHandler extends BaseHandler {
         DateTime higherBound = sr.getAvailabilityHigherBound(event);
 
         SearchGraph graph = new SearchGraph(event, attractions, sr.criterias, lowerBound, higherBound);
-        graph.generateGraph();
 
         Itinerary itinerary = new Itinerary();
         itinerary.event = event;
-        /*itinerary.attractions = graph.listPaths()
+        itinerary.attractions = graph.listPaths()
                 .stream()
                 .map(x -> x.stream()
-                        .filter(y -> y.getType() == GraphNode.EndpointType.NORMAL)
-                        .map(GraphNode::getAttraction)
                         .collect(Collectors.toList())
-                ).collect(Collectors.toList());*/
+                ).collect(Collectors.toList());
 
         return itinerary;
     }
