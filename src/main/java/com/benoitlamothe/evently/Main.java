@@ -26,7 +26,7 @@ public class Main {
     static {
         try {
             defaultCloudStorage = StorageOptions.newBuilder()
-                    .setCredentials(ServiceAccountCredentials.fromStream(new FileInputStream("keys/Evently-66fe4241f3da.json")))
+                    .setCredentials(ServiceAccountCredentials.getApplicationDefault())
                     .setProjectId("evently-157015")
                     .build()
                     .getService();
