@@ -49,6 +49,7 @@ public class PatrimoineOpenDataMiner {
 
             Attraction attr = new Attraction();
             attr.name = featurePropertiesObj.getString("Nom_Patrim");
+            if(attr.name.isEmpty()) { continue; }
             LinkedList<Double> longs = new LinkedList<Double>();
             LinkedList<Double> lats = new LinkedList<Double>();
             for(int j = 0; j < featureObj.getJSONObject("geometry").getJSONArray("coordinates").length(); j++) {
