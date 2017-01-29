@@ -8,8 +8,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by olivier on 2017-01-28.
@@ -111,7 +113,7 @@ public class Attraction implements ILocalizable {
 
         ResultSet rs = pst.getResultSet();
         LinkedList<Attraction> result = new LinkedList<Attraction>();
-        while(rs.next()) {
+        while (rs.next()) {
             Attraction attr = new Attraction();
             attr.id = rs.getInt("id");
             attr.name = rs.getString("name");
@@ -147,5 +149,40 @@ public class Attraction implements ILocalizable {
     @Override
     public double getLong() {
         return this.longitude;
+    }
+
+
+    public boolean isRestaurant() {
+        return categories.contains("Restaurant") ||
+                categories.contains("Gastropubs") ||
+                categories.contains("Pubs") ||
+                categories.contains("Lounge") ||
+                categories.contains("Pizza") ||
+                categories.contains("Brasseries") ||
+                categories.contains("Creperies") ||
+                categories.contains("French") ||
+                categories.contains("Mexican") ||
+                categories.contains("Italian") ||
+                categories.contains("American") ||
+
+                name.contains("Pub") ||
+                name.contains("Sushi") ||
+                name.contains("Restaurant") ||
+                name.contains("restaurant");
+    }
+
+    public boolean isHotel() {
+        return name.contains("Auberge") ||
+                name.contains("Hotel") ||
+                categories.contains("Hotels");
+    }
+
+    public boolean isPark() {
+        return categories.contains("Park") ||
+                categories.contains("Green Space");
+    }
+
+    public boolean isHeritage() {
+        return categories.contains("Heritage");
     }
 }

@@ -42,6 +42,8 @@ public class Main {
 
     public static void main(String[] args) {
         final HikariConfig config = new HikariConfig("/hikari.properties");
+        config.setConnectionTimeout(5000);
+        config.setInitializationFailTimeout(5000);
         final HikariDataSource ds = new HikariDataSource(config);
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(ScheduleCriteria.class, ScheduleCriteria.getCriteriasDeserializer());

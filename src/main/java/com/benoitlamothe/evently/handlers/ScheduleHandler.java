@@ -46,13 +46,11 @@ public class ScheduleHandler extends BaseHandler {
 
         SearchGraph graph = new SearchGraph(event, attractions, sr.criterias, lowerBound, higherBound);
 
+        List<List<Attraction>> paths = graph.listPaths();
         Itinerary itinerary = new Itinerary();
         itinerary.event = event;
-        itinerary.attractions = graph.listPaths()
-                .stream()
-                .map(x -> x.stream()
-                        .collect(Collectors.toList())
-                ).collect(Collectors.toList());
+        itinerary.beforeEvents = paths.get(0);
+        itinerary.afterEvent = paths.get(1);
 
         return itinerary;
     }
