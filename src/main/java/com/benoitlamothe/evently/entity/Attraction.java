@@ -58,7 +58,7 @@ public class Attraction {
     public String categories;
 
     @SerializedName("duration")
-    public int duration = 3600;
+    public int duration = 60;
 
     @SerializedName("reviews")
     public List<AttractionReview> reviews;

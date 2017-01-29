@@ -3,9 +3,7 @@ package com.benoitlamothe.evently.search;
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
-import com.sun.javafx.geom.Line2D;
 import com.sun.tools.doclint.HtmlTag;
-import com.sun.tools.internal.xjc.reader.gbind.Graph;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.joda.time.DateTime;
@@ -24,10 +22,14 @@ public class SearchGraph {
     private static final int GRAPH_FAN = 10;
     private Connection dbConn;
     private List<ScheduleCriteria> enabledCriterias;
+<<<<<<< HEAD
+    private HashMap<Integer, Attraction> loadedAttractions = new HashMap<Integer, Attraction>();
+    private GraphNode generatedStartNode = null;
+=======
     private Map<Integer, Attraction> loadedAttractions;
     private DateTime lowerBound;
     private DateTime higherBound;
-    private GraphNode generatedStartNode;
+>>>>>>> 242b3a7649589b0cd350745737196d5443ab3a63
 
     public SearchGraph(Connection db, List<ScheduleCriteria> criterias, DateTime lowerBound, DateTime higherBound) throws SQLException {
         this.dbConn = db;
@@ -137,51 +139,14 @@ public class SearchGraph {
         this.generatedStartNode = startNode;
     }
 
-    public List<GraphNode> listPath(LinkedList<GraphNode> acc, GraphNode currentNode, LinkedList<GraphNode> excluded) {
-        if(currentNode.currentType == GraphNode.EndpointType.END) {
-            return acc;
-        } else {
-            acc.add(currentNode);
-            List<GraphNode> children = currentNode.children;
-
-            children.sort(new Comparator<GraphNode>() {
-                @Override
-                public int compare(GraphNode o1, GraphNode o2) {
-                    return computeScore(currentNode, o1).compareTo(computeScore(currentNode, o2));
-                }
-            });
-            Optional<GraphNode> optimalChild = children.stream().findFirst();
-            if(!optimalChild.isPresent()) {
-                throw new RuntimeException("Wtf");
-            }
-
-            return listPath(acc, optimalChild.get(), excluded);
-        }
-    }
-
-    public Collection<List<GraphNode>> listPaths() {
-        Collection<List<GraphNode>> paths = new ArrayList<>();
-        LinkedList<GraphNode> excludedNodes = new LinkedList<>();
-        for(GraphNode c : this.generatedStartNode.children) {
-            List<GraphNode> nodes = this.listPath(new LinkedList<>(), c, excludedNodes);
-            paths.add(nodes);
-            excludedNodes.addAll(nodes);
-        }
-
-        return paths;
-    }
-
     public static void main(String[] args) throws SQLException {
         final HikariConfig config = new HikariConfig("/hikari.properties");
         final HikariDataSource ds = new HikariDataSource(config);
 
-        SearchGraph g = new SearchGraph(ds.getConnection(), new LinkedList<ScheduleCriteria>(), DateTime.now(), DateTime.now().plusHours(3));
+        SearchGraph g = new SearchGraph(ds.getConnection(), new LinkedList<ScheduleCriteria>());
         Event evt = new Event();
         evt.startTime = DateTime.now().toDate();
 
         g.generateGraph();
-        Collection<List<GraphNode>> paths = g.listPaths();
-
-        System.out.print("test");
     }
 }
