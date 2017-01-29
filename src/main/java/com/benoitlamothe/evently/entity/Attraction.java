@@ -2,16 +2,21 @@ package com.benoitlamothe.evently.entity;
 
 import com.google.gson.annotations.SerializedName;
 import com.mysql.cj.api.jdbc.Statement;
+import com.sun.tools.doclint.HtmlTag;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Created by olivier on 2017-01-28.
  */
 public class Attraction {
+    @SerializedName("id")
+    public int id;
 
     @SerializedName("name")
     public String name;
@@ -52,6 +57,9 @@ public class Attraction {
     @SerializedName("categories")
     public String categories;
 
+    @SerializedName("duration")
+    public int duration = 3600;
+
     @SerializedName("reviews")
     public List<AttractionReview> reviews;
 
@@ -74,7 +82,7 @@ public class Attraction {
 
      */
     public PreparedStatement getSQLInsert(Connection connection) throws SQLException {
-        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions(`name`, loc_lat, loc_long, location, hours, hours_encoded, description, source_url, phone, website, price_range, categories) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions(`name`, loc_lat, loc_long, location, hours, hours_encoded, description, source_url, phone, website, price_range, categories, duration) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         int i = 0;
         pst.setObject(++i, this.name);
         pst.setObject(++i, this.latitude);
@@ -88,7 +96,37 @@ public class Attraction {
         pst.setObject(++i, this.website);
         pst.setObject(++i, this.priceRange);
         pst.setObject(++i, this.categories);
+        pst.setObject(++i, this.duration);
 
         return pst;
+    }
+
+    public static List<Attraction> getAttractions(Connection connection) throws SQLException {
+        PreparedStatement pst = connection.prepareStatement("SELECT * FROM Attractions");
+        pst.execute();
+
+        ResultSet rs = pst.getResultSet();
+        LinkedList<Attraction> result = new LinkedList<Attraction>();
+        while(rs.next()) {
+            Attraction attr = new Attraction();
+            attr.id = rs.getInt("id");
+            attr.name = rs.getString("name");
+            attr.latitude = rs.getFloat("loc_lat");
+            attr.longitude = rs.getFloat("loc_long");
+            attr.location = rs.getString("location");
+            attr.hours = rs.getString("hours");
+            attr.hoursShift = rs.getInt("hours_encoded");
+            attr.description = rs.getString("description");
+            attr.link = rs.getString("source_url");
+            attr.phone = rs.getString("phone");
+            attr.website = rs.getString("website");
+            attr.priceRange = rs.getString("price_range");
+            attr.categories = rs.getString("categories");
+            attr.duration = rs.getInt("duration");
+
+            result.add(attr);
+        }
+
+        return result;
     }
 }
