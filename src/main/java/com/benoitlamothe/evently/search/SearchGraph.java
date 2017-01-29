@@ -33,35 +33,55 @@ public class SearchGraph {
 
     }
 
-    public List<GraphNode> generateSearchTree(GraphNode currentNode, Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor, List<GraphNode> acc) {
-        if((incrementFactor > 0 && currentTime.isAfter(timeLimit)) || (incrementFactor < 0 && currentTime.isBefore(timeLimit))) {
-            return acc;
+    public void getSubtree(GraphNode currentNode, Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor) {
+        if ((incrementFactor > 0 && currentTime.isAfter(timeLimit)) || (incrementFactor < 0 && currentTime.isBefore(timeLimit)) || currentTime.isEqual(timeLimit)) {
+            return;
         } else {
-            for(Integer id : toBeExplored) {
+            System.out.println(currentTime.toString() + " limit: " + timeLimit.toString() + "incrment: " + incrementFactor);
+            for (Integer id : toBeExplored) {
                 GraphNode node = new GraphNode();
                 node.data = loadedAttractions.get(id);
+                currentNode.children.add(node);
 
-                GraphEdge edge = new GraphEdge();
-                edge.start = currentNode;
-                edge.end = node;
+                DateTime nextDate = incrementFactor > 0 ? currentTime.plusMinutes(loadedAttractions.get(id).duration) : currentTime.minusMinutes(loadedAttractions.get(id).duration);
 
-                currentNode.connections.add(edge);
-                node.connections.add(edge);
+                if(incrementFactor > 0 && nextDate.isBefore(currentTime)) {
+                    throw new RuntimeException();
+                } else if (incrementFactor < 0 && nextDate.isAfter(currentTime)) {
+                    throw new RuntimeException();
+                }
 
-                currentTime.plusMinutes(loadedAttractions.get(id).duration * incrementFactor);
-                List<Integer> toBeExploredCopy = toBeExplored.stream().filter(u -> u != id).collect(Collectors.toList());
-                acc.add(node);
+                List<Integer> toBeExploredCopy = toBeExplored.stream().filter(u -> !u.equals(id)).collect(Collectors.toList());
+                if(toBeExploredCopy.size() != toBeExplored.size()-1) {
+                    throw new RuntimeException();
+                }
 
-                List<GraphNode> subgraph = generateSearchTree(node,
+                getSubtree(node,
                         toBeExploredCopy,
-                        currentTime,
+                        nextDate,
                         timeLimit,
-                        incrementFactor,
-                        acc);
-
-                acc.addAll(subgraph);
+                        incrementFactor);
             }
         }
+    }
+
+    public List<GraphNode> generateSearchTree(Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor) {
+        List<GraphNode> nodes = new LinkedList<>();
+        for (Integer id : toBeExplored) {
+            GraphNode node = new GraphNode();
+            node.data = loadedAttractions.get(id);
+            nodes.add(node);
+
+            DateTime nextDate = incrementFactor > 0 ? currentTime.plusMinutes(loadedAttractions.get(id).duration) : currentTime.minusMinutes(loadedAttractions.get(id).duration);
+            List<Integer> toBeExploredCopy = toBeExplored.stream().filter(u -> !u.equals(id)).collect(Collectors.toList());
+
+            getSubtree(node,
+                    toBeExploredCopy,
+                    nextDate,
+                    timeLimit,
+                    incrementFactor);
+        }
+        return nodes;
     }
 
     public static void main(String[] args) throws SQLException {
@@ -74,12 +94,11 @@ public class SearchGraph {
 
         GraphNode currentNode = new GraphNode();
 
-        List<GraphNode> graph = g.generateSearchTree(currentNode,
+        List<GraphNode> graph = g.generateSearchTree(
                 g.loadedAttractions.keySet(),
                 DateTime.now(),
                 DateTime.now().plusMinutes(-4 * 60),
-                -1,
-                new LinkedList<>());
+                -1);
         System.out.println("Generated!!");
     }
 }
