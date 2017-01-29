@@ -87,8 +87,8 @@ public class Event implements  ILocalizable {
             e.latitude = rst.getFloat("loc_lat");
             e.longitude = rst.getFloat("loc_long");
             e.location = rst.getString("location");
-            e.startTime = new DateTime(rst.getDate("startDateTime"));
-            e.endTime = new DateTime(rst.getDate("endDateTime"));
+            e.startTime = new DateTime(rst.getTimestamp("startDateTime"));
+            e.endTime = new DateTime(rst.getTimestamp("endDateTime"));
             e.category = rst.getString("category");
             e.description = rst.getString("description");
             e.link = rst.getString("website");
@@ -127,8 +127,8 @@ public class Event implements  ILocalizable {
             e.latitude = rst.getFloat("loc_lat");
             e.longitude = rst.getFloat("loc_long");
             e.location = rst.getString("location");
-            e.startTime = new DateTime(rst.getDate("startDateTime"));
-            e.endTime = new DateTime(rst.getDate("endDateTime"));
+            e.startTime = new DateTime(rst.getTimestamp("startDateTime"));
+            e.endTime = new DateTime(rst.getTimestamp("endDateTime"));
             e.category = rst.getString("category");
             e.description = rst.getString("description");
             e.link = rst.getString("website");
