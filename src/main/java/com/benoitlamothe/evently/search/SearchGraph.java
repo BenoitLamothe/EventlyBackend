@@ -66,8 +66,8 @@ public class SearchGraph {
         List<Attraction> after = naive(mainAttraction, before, 1);
 
         List<List<Attraction>> ret = new ArrayList<List<Attraction>>() {{
-            add(before.subList(0, before.size() > 4 ? 4 : before.size() -1));
-            add(after.subList(0, after.size() > 4 ? 4 : after.size() -1));
+            add(before);
+            add(after);
         }};
 
         return ret;
