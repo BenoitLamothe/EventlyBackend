@@ -51,15 +51,15 @@ public class TourismMiner {
             events.addAll(cevents);
         }
         Connection conn = ds.getConnection();
-        for(Event event : events) {
+        for (Event event : events) {
             PreparedStatement pstmt = event.getSQLInsert(conn);
 
             pstmt.executeUpdate();
 
             ResultSet rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
-                for(String url : event.imageSources) {
-                    if(!url.startsWith("http")) {
+                for (String url : event.imageSources) {
+                    if (!url.startsWith("http")) {
                         continue;
                     }
                     Asset a = new Asset();
@@ -68,7 +68,8 @@ public class TourismMiner {
                     try {
                         a.url = CloudUtils.STORAGE_URI + CloudUtils.downloadToBucket(url).getName();
                         a.getSQLInsert(conn).execute();
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                    }
                 }
             }
         }
@@ -115,7 +116,7 @@ public class TourismMiner {
 
                     try {
                         e.startTime = dateFormat.parse(x.select("time").get(0).attr("datetime"));
-                        e.endTime = (Date)e.startTime.clone();
+                        e.endTime = (Date) e.startTime.clone();
                     } catch (ParseException e1) {
                         e1.printStackTrace();
                     }
@@ -127,9 +128,9 @@ public class TourismMiner {
 
                     if (locationNode.isPresent()) {
                         e.location = sanitize(locationNode.get().nextSibling().toString());
-                        GeoUtil.LatLong latlng = GeoUtil.getLatLong(e.location);
-                        e.latitude = latlng.latitude;
-                        e.longitude = latlng.longitude;
+                        //GeoUtil.LatLong latlng = GeoUtil.getLatLong(e.location);
+                        //e.latitude = latlng.latitude;
+                        //e.longitude = latlng.longitude;
                     } else {
                         e.location = "";
                     }
@@ -165,22 +166,23 @@ public class TourismMiner {
 
                     if (hourNode.isPresent()) {
                         String hourRaw = hourNode.get().nextSibling().toString();
+                        System.out.println(hourRaw);
 
-                        Pattern rp = Pattern.compile("(?<fh_h>[0-9]{1,2})h(?<fh_m>[0-9]{1,2})?\\s*à\\s*(?<sh_h>[0-9]{1,2})h(?<sh_m>[0-9]{1,2})?");
-                        Pattern p = Pattern.compile("([0-9]{1,2})h([0-9]{1,2})?");
+                        Pattern rp = Pattern.compile("(?<fhh>[0-9]{1,2})h(?<fhm>[0-9]{1,2})?\\s*à\\s*(?<shh>[0-9]{1,2})h(?<shm>[0-9]{1,2})?");
+                        Pattern p = Pattern.compile("(?<h>[0-9]{1,2})h(?<m>[0-9]{1,2})?");
 
                         Matcher rangeMatcher = rp.matcher(hourRaw);
                         Matcher fixedMatcher = p.matcher(hourRaw);
 
-                        if(rangeMatcher.matches()) {
+                        if (rangeMatcher.find()) {
                             System.out.println("Detected hour range: " + hourRaw);
                             Calendar cs = Calendar.getInstance();
                             cs.setTime(e.startTime);
 
-                            cs.add(Calendar.HOUR, Integer.parseInt(fixedMatcher.group("fh_h")));
+                            cs.add(Calendar.HOUR, Integer.parseInt(rangeMatcher.group("fhh")));
 
-                            if(rangeMatcher.group("fh_m") != null) {
-                                cs.add(Calendar.MINUTE, Integer.parseInt(fixedMatcher.group("fh_m")));
+                            if(rangeMatcher.group("fhm") != null) {
+                                cs.add(Calendar.MINUTE, Integer.parseInt(rangeMatcher.group("fhm")));
                             }
 
                             e.startTime = cs.getTime();
@@ -188,25 +190,28 @@ public class TourismMiner {
                             Calendar ce = Calendar.getInstance();
                             ce.setTime(e.endTime);
 
-                            ce.add(Calendar.HOUR, Integer.parseInt(fixedMatcher.group("sh_h")));
+                            ce.add(Calendar.HOUR, Integer.parseInt(rangeMatcher.group("shh")));
 
-                            if(rangeMatcher.group("sh_m") != null) {
-                                ce.add(Calendar.MINUTE, Integer.parseInt(fixedMatcher.group("sh_m")));
+
+                            if(rangeMatcher.group("shm") != null) {
+                                ce.add(Calendar.MINUTE, Integer.parseInt(rangeMatcher.group("shm")));
                             }
 
                             e.startTime = ce.getTime();
 
-                        } else if(fixedMatcher.matches()) {
+                        } else if (fixedMatcher.find()) {
+                            System.out.println("Detected hour: " + hourRaw);
                             Calendar c = Calendar.getInstance();
                             c.setTime(e.startTime);
 
-                            c.add(Calendar.HOUR, Integer.parseInt(fixedMatcher.group(1)));
+                            c.add(Calendar.HOUR, Integer.parseInt(fixedMatcher.group("h")));
 
-                            if(fixedMatcher.groupCount() == 3) {
-                                c.add(Calendar.MINUTE, Integer.parseInt(fixedMatcher.group(2)));
+                            if (fixedMatcher.group("m") != null) {
+                                c.add(Calendar.MINUTE, Integer.parseInt(fixedMatcher.group("m")));
                             }
 
                             e.startTime = c.getTime();
+                            e.endTime = (Date) c.getTime().clone();
                         }
                     }
 
