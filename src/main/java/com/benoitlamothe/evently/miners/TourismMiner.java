@@ -92,8 +92,6 @@ public class TourismMiner {
 
                     e.name = sanitize(x.select("h1").get(0).text());
 
-                    System.out.println(e.name);
-
                     e.description = sanitize(x.childNodes()
                             .stream()
                             .filter(y -> {
@@ -169,7 +167,6 @@ public class TourismMiner {
 
                     if (hourNode.isPresent()) {
                         String hourRaw = hourNode.get().nextSibling().toString();
-                        System.out.println(hourRaw);
 
                         Pattern rp = Pattern.compile("(?<fhh>[0-9]{1,2})h(?<fhm>[0-9]{1,2})?\\s*à\\s*(?<shh>[0-9]{1,2})h(?<shm>[0-9]{1,2})?");
                         Pattern p = Pattern.compile("(?<h>[0-9]{1,2})h(?<m>[0-9]{1,2})?");
@@ -178,7 +175,6 @@ public class TourismMiner {
                         Matcher fixedMatcher = p.matcher(hourRaw);
 
                         if (rangeMatcher.find()) {
-                            System.out.println("Detected hour range: " + hourRaw);
 
                             DateTime dateFrom = new DateTime(e.startTime);
 
@@ -212,7 +208,6 @@ public class TourismMiner {
                             e.startTime = dateTo.toDate();
 
                         } else if (fixedMatcher.find()) {
-                            System.out.println("Detected hour: " + hourRaw);
 
                             DateTime dateTime = new DateTime(e.startTime);
 

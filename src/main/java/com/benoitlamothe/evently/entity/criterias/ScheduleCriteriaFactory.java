@@ -11,6 +11,8 @@ public class ScheduleCriteriaFactory {
             return new CategoriesCriteria();
         } else if(name.equalsIgnoreCase("budget")) {
             return new BudgetCriteria();
+        } else if (name.equalsIgnoreCase("transport")) {
+            return new TransportCriteria();
         }
 
         throw new NotImplementedException();
