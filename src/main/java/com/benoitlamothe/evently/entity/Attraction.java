@@ -63,6 +63,10 @@ public class Attraction {
     @SerializedName("reviews")
     public List<AttractionReview> reviews;
 
+    public Integer getID() {
+        return this.id;
+    }
+
     /*
         CREATE TABLE `Attractions` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,

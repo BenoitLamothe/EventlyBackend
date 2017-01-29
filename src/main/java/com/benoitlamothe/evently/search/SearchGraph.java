@@ -3,6 +3,7 @@ package com.benoitlamothe.evently.search;
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
+import com.sun.tools.doclint.HtmlTag;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.joda.time.DateTime;
@@ -11,6 +12,7 @@ import javax.smartcardio.ATR;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -20,18 +22,18 @@ public class SearchGraph {
     private static final int GRAPH_FAN = 10;
     private Connection dbConn;
     private List<ScheduleCriteria> enabledCriterias;
-    private HashMap<Integer, Attraction> loadedAttractions = new HashMap<Integer, Attraction>();
+    private Map<Integer, Attraction> loadedAttractions;
+    private DateTime lowerBound;
+    private DateTime higherBound;
 
-    public SearchGraph(Connection db, List<ScheduleCriteria> criterias) throws SQLException {
+    public SearchGraph(Connection db, List<ScheduleCriteria> criterias, DateTime lowerBound, DateTime higherBound) throws SQLException {
         this.dbConn = db;
         this.enabledCriterias = criterias;
-        List<Attraction> attractions = Attraction.getAttractions(this.dbConn);
-        attractions.forEach(x -> loadedAttractions.put(x.id, x));
-    }
-
-    public void generateFromEvent(Event evt, DateTime limit, int incrementFactor) throws SQLException {
-        GraphNode startNode = new GraphNode();
-
+        this.lowerBound = lowerBound;
+        this.higherBound = higherBound;
+        this.loadedAttractions = Attraction.getAttractions(this.dbConn)
+                .stream()
+                .collect(Collectors.toMap(Attraction::getID, Function.identity()));
     }
 
     public void getSubtree(GraphNode currentNode, Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor) {
@@ -46,7 +48,7 @@ public class SearchGraph {
 
                 DateTime nextDate = incrementFactor > 0 ? currentTime.plusMinutes(loadedAttractions.get(id).duration) : currentTime.minusMinutes(loadedAttractions.get(id).duration);
 
-                if(incrementFactor > 0 && nextDate.isBefore(currentTime)) {
+                if (incrementFactor > 0 && nextDate.isBefore(currentTime)) {
                     throw new RuntimeException();
                 } else if (incrementFactor < 0 && nextDate.isAfter(currentTime)) {
                     throw new RuntimeException();
@@ -54,7 +56,7 @@ public class SearchGraph {
 
                 List<Integer> toBeExploredCopy = toBeExplored.stream().filter(u -> !u.equals(id)).collect(Collectors.toList());
                 toBeExploredCopy = this.getBestPromising(GRAPH_FAN, toBeExploredCopy, currentNode);
-                if(toBeExploredCopy.size() != toBeExplored.size()-1) {
+                if (toBeExploredCopy.size() != toBeExplored.size() - 1) {
 //                    throw new RuntimeException();
                 }
 
@@ -101,8 +103,8 @@ public class SearchGraph {
             }
         });
         ints.forEach(toBeExploredSorted::add);
-        for(int i = 0 ; i < x; i++) {
-            if(toBeExploredSorted.isEmpty()) {
+        for (int i = 0; i < x; i++) {
+            if (toBeExploredSorted.isEmpty()) {
                 break;
             }
 
