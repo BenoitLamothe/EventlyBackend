@@ -174,28 +174,17 @@ public class SearchGraph {
             return positionFactor.intValue();
         }).collect(Collectors.toList());
 
-        for(Attraction a : sortedAttraction) {
-            System.out.println(a.name + " :" + GeoUtil.distance(this.event.latitude, a.latitude, this.event.longitude, a.longitude, 0, 0));
-        }
-
         List<Attraction> before = naive(sortedAttraction.get(0), new ArrayList<>(), -1);
 
         sortedAttraction.removeAll(before);
 
-        System.out.println("===============================");
-
-        for(Attraction a : sortedAttraction) {
-            System.out.println(a.name + " :" + GeoUtil.distance(this.event.latitude, a.latitude, this.event.longitude, a.longitude, 0, 0));
-        }
 
         List<Attraction> after = naive(sortedAttraction.get(0), before, 1);
-
 
         List<List<Attraction>> ret = new ArrayList<List<Attraction>>() {{
             add(before);
             add(after);
         }};
-
 
 //        //Debug
 //        for (List<Attraction> path : ret) {
