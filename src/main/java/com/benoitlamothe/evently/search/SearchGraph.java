@@ -2,6 +2,7 @@ package com.benoitlamothe.evently.search;
 
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
+import com.benoitlamothe.evently.entity.criterias.EulerDistanceCriteria;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.sun.javafx.geom.Line2D;
 import com.sun.tools.internal.xjc.reader.gbind.Graph;
@@ -183,6 +184,7 @@ public class SearchGraph {
                 .stream()
                 .collect(Collectors.toMap(Attraction::getID, Function.identity()));
         SearchGraph g = new SearchGraph(null, attractions, new LinkedList<ScheduleCriteria>(), DateTime.now(), DateTime.now().plusHours(3));
+        g.enabledCriterias.add(new EulerDistanceCriteria());
         g.generateGraph();
         Collection<List<GraphNode>> paths = g.listPaths();
 
