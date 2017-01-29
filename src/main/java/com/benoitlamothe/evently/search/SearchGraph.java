@@ -3,6 +3,7 @@ package com.benoitlamothe.evently.search;
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.criterias.CategoriesCriteria;
+import com.benoitlamothe.evently.entity.criterias.ContentQualityCriteria;
 import com.benoitlamothe.evently.entity.criterias.EulerDistanceCriteria;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.benoitlamothe.evently.utils.GeoUtil;
@@ -36,6 +37,8 @@ public class SearchGraph {
         this.lowerBound = lowerBound;
         this.higherBound = higherBound;
         this.attractions = attractions;
+
+        this.enabledCriterias.add(new ContentQualityCriteria());
     }
 
     /*public void getSubtree(GraphNode currentNode, Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor, int level) {
