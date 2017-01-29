@@ -3,8 +3,10 @@ package com.benoitlamothe.evently.search;
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.criterias.ContentQualityCriteria;
+import com.benoitlamothe.evently.entity.criterias.RandomizationCriteria;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.benoitlamothe.evently.utils.GeoUtil;
+import com.sun.tools.doclint.HtmlTag;
 import org.joda.time.DateTime;
 
 import java.sql.SQLException;
@@ -22,13 +24,15 @@ public class SearchGraph {
     private DateTime lowerBound;
     private DateTime higherBound;
     private GraphNode generatedStartNode;
+    private boolean randomize;
 
-    public SearchGraph(Event event, Map<Integer, Attraction> attractions, List<ScheduleCriteria> criterias, DateTime lowerBound, DateTime higherBound) throws SQLException {
+    public SearchGraph(Event event, Map<Integer, Attraction> attractions, List<ScheduleCriteria> criterias, boolean randomize, DateTime lowerBound, DateTime higherBound) throws SQLException {
         this.event = event;
         this.enabledCriterias = criterias;
         this.lowerBound = lowerBound;
         this.higherBound = higherBound;
         this.attractions = attractions;
+        this.randomize = randomize;
 
         this.enabledCriterias.add(new ContentQualityCriteria());
     }
@@ -169,12 +173,21 @@ public class SearchGraph {
             return positionFactor.intValue();
         }).collect(Collectors.toList());
 
-        List<Attraction> before = naive(sortedAttraction.get(0), new ArrayList<>(), -1);
+        Attraction mainAttraction;
 
+        if(this.randomize) {
+            List<Attraction> shuffled = sortedAttraction.subList(0, 10);
+            Collections.shuffle(shuffled);
+            mainAttraction = shuffled.get(0);
+        } else {
+            mainAttraction = sortedAttraction.get(0);
+        }
+
+        List<Attraction> before = naive(mainAttraction, new ArrayList<>(), -1);
         sortedAttraction.removeAll(before);
 
 
-        List<Attraction> after = naive(sortedAttraction.get(0), before, 1);
+        List<Attraction> after = naive(mainAttraction, before, 1);
 
         List<List<Attraction>> ret = new ArrayList<List<Attraction>>() {{
             add(before);
@@ -194,7 +207,7 @@ public class SearchGraph {
     }
 
     public Optional<Integer> getBestAttractionFromCriterias(Attraction from, List<Attraction> scheduleSoFar) {
-        Collection<Integer> sortedAttraction = attractions.keySet().stream().sorted(new Comparator<Integer>() {
+        List<Integer> sortedAttraction = attractions.keySet().stream().sorted(new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
                 Attraction o1A = attractions.get(o1);
@@ -212,8 +225,15 @@ public class SearchGraph {
 
         List<Integer> attractionIdSoFar = scheduleSoFar.stream().map(x -> x.id).collect(Collectors.toList());
         sortedAttraction = sortedAttraction.stream().filter(x -> !attractionIdSoFar.contains(x)).collect(Collectors.toList());
-        Optional<Integer> bestAttrId = sortedAttraction.stream().findFirst();
-        return bestAttrId;
+
+
+        if(this.randomize) {
+            List<Integer> shuffled = sortedAttraction.subList(0, sortedAttraction.size()/2);
+            Collections.shuffle(shuffled);
+            return shuffled.stream().findFirst();
+        } else {
+            return sortedAttraction.stream().findFirst();
+        }
     }
 
     public List<Attraction> naive(Attraction fromAttraction, List<Attraction> exclusions, int factor) {

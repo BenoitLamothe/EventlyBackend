@@ -44,11 +44,8 @@ public class ScheduleHandler extends BaseHandler {
         DateTime lowerBound = sr.getAvailabilityLowerBound(event);
         DateTime higherBound = sr.getAvailabilityHigherBound(event);
 
-        if(sr.randomize) {
-            sr.criterias.add(new RandomizationCriteria());
-        }
 
-        SearchGraph graph = new SearchGraph(event, attractions, sr.criterias, lowerBound, higherBound);
+        SearchGraph graph = new SearchGraph(event, attractions, sr.criterias, sr.randomize, lowerBound, higherBound);
 
         List<List<Attraction>> paths = graph.listPaths();
         Itinerary itinerary = new Itinerary();
