@@ -153,7 +153,7 @@ public class Attraction implements ILocalizable {
 
 
     public boolean isRestaurant() {
-        return  categories.contains("Restaurant") ||
+        return categories.contains("Restaurant") ||
                 categories.contains("Gastropubs") ||
                 categories.contains("Pubs") ||
                 categories.contains("Lounge") ||
@@ -178,6 +178,11 @@ public class Attraction implements ILocalizable {
     }
 
     public boolean isPark() {
-        return categories.contains("Park");
+        return categories.contains("Park") ||
+                categories.contains("Green Space");
+    }
+
+    public boolean isHeritage() {
+        return categories.contains("Heritage");
     }
 }

@@ -174,10 +174,21 @@ public class SearchGraph {
             return positionFactor.intValue();
         }).collect(Collectors.toList());
 
-        Attraction attraction = sortedAttraction.get(0);
+        for(Attraction a : sortedAttraction) {
+            System.out.println(a.name + " :" + GeoUtil.distance(this.event.latitude, a.latitude, this.event.longitude, a.longitude, 0, 0));
+        }
 
-        List<Attraction> before = naive(attraction, new ArrayList<>(), -1);
-        List<Attraction> after = naive(attraction, before, 1);
+        List<Attraction> before = naive(sortedAttraction.get(0), new ArrayList<>(), -1);
+
+        sortedAttraction.removeAll(before);
+
+        System.out.println("===============================");
+
+        for(Attraction a : sortedAttraction) {
+            System.out.println(a.name + " :" + GeoUtil.distance(this.event.latitude, a.latitude, this.event.longitude, a.longitude, 0, 0));
+        }
+
+        List<Attraction> after = naive(sortedAttraction.get(0), before, 1);
 
 
         List<List<Attraction>> ret = new ArrayList<List<Attraction>>() {{
@@ -186,15 +197,15 @@ public class SearchGraph {
         }};
 
 
-        //Debug
-        for (List<Attraction> path : ret) {
-            System.out.println("===============================");
-            for (Attraction a : path) {
-                System.out.println(a.name + " :" + GeoUtil.distance(this.event.latitude, a.latitude, this.event.longitude, a.longitude, 0, 0));
-            }
-            System.out.println("===============================");
-        }
-        //
+//        //Debug
+//        for (List<Attraction> path : ret) {
+//            System.out.println("===============================");
+//            for (Attraction a : path) {
+//                System.out.println(a.name + " :" + GeoUtil.distance(this.event.latitude, a.latitude, this.event.longitude, a.longitude, 0, 0));
+//            }
+//            System.out.println("===============================");
+//        }
+//        //
         return ret;
     }
 
@@ -227,6 +238,7 @@ public class SearchGraph {
         int timeIncrementFactor = -1;
         boolean keepOnGoing = true;
         LinkedList<Attraction> currentAttractionSet = new LinkedList<>();
+        currentAttractionSet.add(fromAttraction);
 
         while (keepOnGoing) {
             LinkedList<Attraction> temp = new LinkedList<>();
@@ -261,8 +273,12 @@ public class SearchGraph {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isHotel).collect(Collectors.toList()));
         }
 
-        if(current.stream().filter(Attraction::isPark).count() >= 1) {
+        if(current.stream().filter(Attraction::isPark).count() >= 2) {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isPark).collect(Collectors.toList()));
+        }
+
+        if(current.stream().filter(Attraction::isHeritage).count() >= 2) {
+            exclusions.addAll(this.attractions.values().stream().filter(Attraction::isHeritage).collect(Collectors.toList()));
         }
 
         return exclusions;

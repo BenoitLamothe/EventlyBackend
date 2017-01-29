@@ -12,9 +12,9 @@ public class Itinerary {
     @SerializedName("event")
     public Event event;
 
-    @SerializedName("beforeEvents")
+    @SerializedName("beforeAttractions")
     public List<Attraction> beforeEvents;
 
-    @SerializedName("afterEvents")
+    @SerializedName("afterAttractions")
     public List<Attraction> afterEvent;
 }
