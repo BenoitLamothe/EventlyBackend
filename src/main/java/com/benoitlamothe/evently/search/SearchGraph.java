@@ -44,7 +44,7 @@ public class SearchGraph {
 
         Attraction mainAttraction;
 
-        if(this.randomize) {
+        if (this.randomize) {
             List<Attraction> shuffled = sortedAttraction.subList(0, 10);
             Collections.shuffle(shuffled);
             mainAttraction = shuffled.get(0);
@@ -55,7 +55,7 @@ public class SearchGraph {
         List<Attraction> before = naive(mainAttraction, new ArrayList<>(), -1);
         sortedAttraction.removeAll(before);
 
-        if(this.randomize) {
+        if (this.randomize) {
             List<Attraction> shuffled = sortedAttraction.subList(0, 10);
             Collections.shuffle(shuffled);
             mainAttraction = shuffled.get(0);
@@ -66,8 +66,8 @@ public class SearchGraph {
         List<Attraction> after = naive(mainAttraction, before, 1);
 
         List<List<Attraction>> ret = new ArrayList<List<Attraction>>() {{
-            add(before.subList(0, before.size() > 4 ? 4 : before.size() -1));
-            add(after.subList(0, after.size() > 4 ? 4 : after.size() -1));
+            add(before.subList(0, before.size() > 4 ? 4 : Math.max(before.size() - 1, 0)));
+            add(after.subList(0, after.size() > 4 ? 4 : Math.max(after.size() - 1, 0)));
         }};
 
         return ret;
@@ -94,8 +94,8 @@ public class SearchGraph {
         sortedAttraction = sortedAttraction.stream().filter(x -> !attractionIdSoFar.contains(x)).collect(Collectors.toList());
 
 
-        if(this.randomize) {
-            List<Integer> shuffled = sortedAttraction.subList(0, sortedAttraction.size()/2);
+        if (this.randomize) {
+            List<Integer> shuffled = sortedAttraction.subList(0, sortedAttraction.size() / 2);
             Collections.shuffle(shuffled);
             return shuffled.stream().findFirst();
         } else {
@@ -136,19 +136,19 @@ public class SearchGraph {
     public List<Attraction> computeExclusions(List<Attraction> current) {
         List<Attraction> exclusions = new LinkedList<>();
 
-        if(current.stream().filter(Attraction::isRestaurant).count() >= 1) {
+        if (current.stream().filter(Attraction::isRestaurant).count() >= 1) {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isRestaurant).collect(Collectors.toList()));
         }
 
-        if(current.stream().filter(Attraction::isHotel).count() >= 1) {
+        if (current.stream().filter(Attraction::isHotel).count() >= 1) {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isHotel).collect(Collectors.toList()));
         }
 
-        if(current.stream().filter(Attraction::isPark).count() >= 2) {
+        if (current.stream().filter(Attraction::isPark).count() >= 2) {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isPark).collect(Collectors.toList()));
         }
 
-        if(current.stream().filter(Attraction::isHeritage).count() >= 2) {
+        if (current.stream().filter(Attraction::isHeritage).count() >= 2) {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isHeritage).collect(Collectors.toList()));
         }
 
