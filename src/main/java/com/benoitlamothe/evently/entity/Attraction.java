@@ -63,6 +63,9 @@ public class Attraction implements ILocalizable {
     @SerializedName("duration")
     public int duration = 60;
 
+    @SerializedName("rating")
+    public Double rating;
+
     @SerializedName("reviews")
     public List<AttractionReview> reviews;
 
@@ -89,7 +92,7 @@ public class Attraction implements ILocalizable {
 
      */
     public PreparedStatement getSQLInsert(Connection connection) throws SQLException {
-        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions(`name`, loc_lat, loc_long, location, hours, hours_encoded, description, source_url, phone, website, price_range, categories, duration) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement pst = connection.prepareStatement("INSERT INTO Attractions(`name`, loc_lat, loc_long, location, hours, hours_encoded, description, source_url, phone, website, price_range, categories, duration, rating) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         int i = 0;
         pst.setObject(++i, this.name);
         pst.setObject(++i, this.latitude);
@@ -104,6 +107,7 @@ public class Attraction implements ILocalizable {
         pst.setObject(++i, this.priceRange);
         pst.setObject(++i, this.categories);
         pst.setObject(++i, this.duration);
+        pst.setObject(++i, this.rating);
 
         return pst;
     }
@@ -130,6 +134,7 @@ public class Attraction implements ILocalizable {
             attr.priceRange = rs.getString("price_range");
             attr.categories = rs.getString("categories");
             attr.duration = rs.getInt("duration");
+            attr.rating = rs.getDouble("rating");
 
             String[] cats = attr.categories.split(",");
             attr.categories = cats.length == 0 ? attr.categories : cats[0];
