@@ -11,4 +11,14 @@ import java.util.List;
 public class GraphNode {
     Attraction data;
     List<GraphNode> children = new LinkedList<>();
+    EndpointType currentType = EndpointType.NORMAL;
+
+    enum EndpointType {
+        START, END, NORMAL
+    }
+
+    public EndpointType getType() {
+        return this.currentType;
+    }
+
 }

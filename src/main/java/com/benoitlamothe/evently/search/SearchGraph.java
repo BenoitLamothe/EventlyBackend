@@ -21,6 +21,7 @@ public class SearchGraph {
     private Connection dbConn;
     private List<ScheduleCriteria> enabledCriterias;
     private HashMap<Integer, Attraction> loadedAttractions = new HashMap<Integer, Attraction>();
+    private GraphNode generatedStartNode = null;
 
     public SearchGraph(Connection db, List<ScheduleCriteria> criterias) throws SQLException {
         this.dbConn = db;
@@ -36,7 +37,9 @@ public class SearchGraph {
 
     public void getSubtree(GraphNode currentNode, Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor) {
         if ((incrementFactor > 0 && currentTime.isAfter(timeLimit)) || (incrementFactor < 0 && currentTime.isBefore(timeLimit)) || currentTime.isEqual(timeLimit)) {
-            return;
+            GraphNode endNode = new GraphNode();
+            endNode.currentType = GraphNode.EndpointType.END;
+            currentNode.children.add(endNode);
         } else {
             System.out.println(currentTime.toString() + " limit: " + timeLimit.toString() + "incrment: " + incrementFactor);
             for (Integer id : toBeExplored) {
@@ -113,10 +116,21 @@ public class SearchGraph {
     }
 
     public Double computeScore(GraphNode from, GraphNode to) {
-        //List<Double> mm = this.enabledCriterias.stream().map(x -> x.computeScrore(from, to)).collect(Collectors.toList());
-        //return mm.stream().reduce((x, y) -> x + y).get();
+        List<Double> mm = this.enabledCriterias.stream().map(x -> x.computeScrore(from, to)).collect(Collectors.toList());
+        Optional<Double> sum = mm.stream().reduce((x, y) -> x + y);
+        return sum.isPresent() ? sum.get() : 0.0;
+    }
 
-        return 100.0;
+    public void generateGraph() {
+        GraphNode startNode = new GraphNode();
+        startNode.currentType = GraphNode.EndpointType.START;
+        startNode.children.addAll(this.generateSearchTree(
+                this.loadedAttractions.keySet(),
+                DateTime.now(),
+                DateTime.now().minusMinutes(4 * 60),
+                -1));
+
+        this.generatedStartNode = startNode;
     }
 
     public static void main(String[] args) throws SQLException {
@@ -127,13 +141,6 @@ public class SearchGraph {
         Event evt = new Event();
         evt.startTime = DateTime.now().toDate();
 
-        GraphNode currentNode = new GraphNode();
-
-        List<GraphNode> graph = g.generateSearchTree(
-                g.loadedAttractions.keySet(),
-                DateTime.now(),
-                DateTime.now().minusMinutes(4 * 60),
-                -1);
-        System.out.println("Generated!!");
+        g.generateGraph();
     }
 }
