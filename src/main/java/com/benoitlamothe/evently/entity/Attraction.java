@@ -1,5 +1,6 @@
 package com.benoitlamothe.evently.entity;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.mysql.cj.api.jdbc.Statement;
 
@@ -55,6 +56,9 @@ public class Attraction implements ILocalizable {
 
     @SerializedName("categories")
     public String categories;
+
+    @SerializedName("mainCategory")
+    public String mainCat;
 
     @SerializedName("duration")
     public int duration = 60;
@@ -126,6 +130,9 @@ public class Attraction implements ILocalizable {
             attr.priceRange = rs.getString("price_range");
             attr.categories = rs.getString("categories");
             attr.duration = rs.getInt("duration");
+
+            String[] cats = attr.categories.split(",");
+            attr.categories = cats.length == 0 ? attr.categories : cats[0];
 
             result.add(attr);
         }
