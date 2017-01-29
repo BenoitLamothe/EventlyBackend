@@ -24,6 +24,10 @@ public abstract class ScheduleCriteria {
         };
     }
 
+    protected boolean isValidNode(GraphNode node) {
+        return node.getAttraction() != null;
+    }
+
     public static JsonDeserializer<ScheduleCriteria> getCriteriasDeserializer() {
         return new JsonDeserializer<ScheduleCriteria>() {
             @Override
