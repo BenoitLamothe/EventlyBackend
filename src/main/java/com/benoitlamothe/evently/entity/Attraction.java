@@ -161,36 +161,18 @@ public class Attraction implements ILocalizable {
 
 
     public boolean isRestaurant() {
-        return categories.contains("Restaurant") ||
-                categories.contains("Gastropubs") ||
-                categories.contains("Pubs") ||
-                categories.contains("Lounge") ||
-                categories.contains("Pizza") ||
-                categories.contains("Brasseries") ||
-                categories.contains("Creperies") ||
-                categories.contains("French") ||
-                categories.contains("Mexican") ||
-                categories.contains("Italian") ||
-                categories.contains("American") ||
-
-                name.contains("Pub") ||
-                name.contains("Sushi") ||
-                name.contains("Restaurant") ||
-                name.contains("restaurant");
+        return categories.toLowerCase().contains("restaurant");
     }
 
     public boolean isHotel() {
-        return name.contains("Auberge") ||
-                name.contains("Hotel") ||
-                categories.contains("Hotels");
+        return categories.toLowerCase().contains("hotel");
     }
 
     public boolean isPark() {
-        return categories.contains("Park") ||
-                categories.contains("Green Space");
+        return categories.toLowerCase().contains("park");
     }
 
     public boolean isHeritage() {
-        return categories.contains("Heritage");
+        return categories.toLowerCase().contains("heritage");
     }
 }

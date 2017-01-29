@@ -35,7 +35,10 @@ public class CategoriesCriteria extends ScheduleCriteria {
         JsonObject serialized = new JsonObject();
         serialized.add("name", new JsonPrimitive("categories"));
         JsonArray arrValue = new JsonArray();
-        categories.forEach(arrValue::add);
+        categories
+                .stream()
+                .map(String::toLowerCase)
+                .forEach(arrValue::add);
         serialized.add("value", arrValue);
 
         return serialized;
@@ -44,11 +47,15 @@ public class CategoriesCriteria extends ScheduleCriteria {
     @Override
     public double computeScrore(Attraction from, Attraction to) {
         int fromScore = Stream.of(from.categories.split(","))
-                .map(x -> this.categories.contains(x) ? 1 : 0)
+                .map(String::toLowerCase)
+                .map(String::trim)
+                .map(x -> this.categories.contains(x.toLowerCase()) ? 1 : 0)
                 .reduce(0, (x, y) -> x + y);
 
         int toScore = Stream.of(to.categories.split(","))
-                .map(x -> this.categories.contains(x) ? 1 : 0)
+                .map(String::toLowerCase)
+                .map(String::trim)
+                .map(x -> this.categories.contains(x.toLowerCase()) ? 1 : 0)
                 .reduce(0, (x, y) -> x + y);
 
         return fromScore - toScore;
