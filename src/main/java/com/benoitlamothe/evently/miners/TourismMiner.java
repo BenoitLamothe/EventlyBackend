@@ -118,8 +118,8 @@ public class TourismMiner {
                             .reduce("", (a, b) -> a + b));
 
                     try {
-                        e.startTime = dateFormat.parse(x.select("time").get(0).attr("datetime"));
-                        e.endTime = (Date) e.startTime.clone();
+                        e.startTime = new DateTime(dateFormat.parse(x.select("time").get(0).attr("datetime")));
+                        e.endTime = new DateTime(e.startTime);
                     } catch (ParseException e1) {
                         e1.printStackTrace();
                     }
@@ -193,7 +193,7 @@ public class TourismMiner {
                                 dateFrom = dateFrom.plusHours(12);
                             }
 
-                            e.startTime = dateFrom.toDate();
+                            e.startTime = dateFrom;
 
                             DateTime dateTo = new DateTime(e.endTime);
 
@@ -207,7 +207,7 @@ public class TourismMiner {
                                 dateTo = dateTo.plusHours(12);
                             }
 
-                            e.startTime = dateTo.toDate();
+                            e.startTime = dateTo;
 
                         } else if (fixedMatcher.find()) {
 
@@ -223,16 +223,16 @@ public class TourismMiner {
                                 dateTime = dateTime.plusHours(12);
                             }
 
-                            e.startTime = dateTime.toDate();
-                            e.endTime = dateTime.plusHours(2).toDate();
+                            e.startTime = dateTime;
+                            e.endTime = dateTime.plusHours(2);
                         } else {
                             DateTime dateTime = new DateTime(e.startTime);
                             if(dateTime.getHourOfDay() < 6) {
                                 dateTime = dateTime.plusHours(12);
                             }
 
-                            e.startTime = dateTime.toDate();
-                            e.endTime = dateTime.plusHours(2).toDate();
+                            e.startTime = dateTime;
+                            e.endTime = dateTime.plusHours(2);
                         }
                     }
 

@@ -5,6 +5,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -70,7 +71,7 @@ public class EventsOpenDataMiner {
             evt.location = featurePropertiesObj.getString("LIEU");
             evt.longitude = (float) featureObj.getJSONObject("geometry").getJSONArray("coordinates").getDouble(0);
             evt.latitude = (float) featureObj.getJSONObject("geometry").getJSONArray("coordinates").getDouble(1);
-            evt.startTime = this.parseDate(featurePropertiesObj.getString("MOIS"), featurePropertiesObj.getInt("Annee"));
+            evt.startTime = new DateTime(this.parseDate(featurePropertiesObj.getString("MOIS"), featurePropertiesObj.getInt("Annee")));
             evt.description = "";
             evt.link = "";
 
