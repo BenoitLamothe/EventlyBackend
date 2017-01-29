@@ -136,7 +136,7 @@ public class Attraction implements ILocalizable {
             attr.rating = rs.getDouble("rating");
 
             String[] cats = attr.categories.split(",");
-            attr.categories = cats.length == 0 ? attr.categories : cats[0];
+            attr.mainCat = cats.length == 0 ? attr.categories : cats[0];
 
             result.add(attr);
         }
