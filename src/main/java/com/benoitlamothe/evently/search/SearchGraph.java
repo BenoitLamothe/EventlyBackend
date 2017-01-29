@@ -174,11 +174,13 @@ public class SearchGraph {
             return positionFactor.intValue();
         }).collect(Collectors.toList());
 
-        return sortedAttraction
-                .stream()
-                .limit(10)
-                .map(this::naive)
-                .collect(Collectors.toList());
+        List<List<Attraction>> ret = new LinkedList<>();
+        for(Attraction attraction : sortedAttraction.subList(0, 10)) {
+            ret.add(naive(attraction, ret.stream().flatMap(Collection::stream).collect(Collectors.toList()), -1));
+            ret.add(naive(attraction, ret.stream().flatMap(Collection::stream).collect(Collectors.toList()), 1));
+
+        }
+        return ret;
     }
 
     public Optional<Integer> getBestAttractionFromCriterias(Attraction from, LinkedList<Attraction> scheduleSoFar) {
@@ -204,14 +206,18 @@ public class SearchGraph {
         return bestAttrId;
     }
 
-    public List<Attraction>  naive(Attraction fromAttraction) {
-        DateTime currentTime = DateTime.now();
-        DateTime limitTime = currentTime.minusHours(4);
+    public List<Attraction> naive(Attraction fromAttraction, List<Attraction> excluded, int factor) {
+        DateTime currentTime = factor > 0 ? new DateTime(this.event.endTime) : new DateTime(this.event.startTime);
+        DateTime limitTime = factor > 0 ? this.higherBound : this.lowerBound;
         int timeIncrementFactor = -1;
         boolean keepOnGoing = true;
         LinkedList<Attraction> currentAttractionSet = new LinkedList<>();
+
         while(keepOnGoing) {
-            Optional<Integer> addAttractionOpt = this.getBestAttractionFromCriterias(fromAttraction, currentAttractionSet);
+            LinkedList<Attraction> temp = new LinkedList<>();
+            temp.addAll(excluded);
+            temp.addAll(currentAttractionSet);
+            Optional<Integer> addAttractionOpt = this.getBestAttractionFromCriterias(fromAttraction, temp);
             if(!addAttractionOpt.isPresent()) { break; }
             Attraction addAttraction = attractions.get(addAttractionOpt.get());
             currentAttractionSet.add(addAttraction);
