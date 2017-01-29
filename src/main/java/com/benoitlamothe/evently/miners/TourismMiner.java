@@ -210,7 +210,13 @@ public class TourismMiner {
                                 c.add(Calendar.MINUTE, Integer.parseInt(fixedMatcher.group("m")));
                             }
 
-                            e.startTime = c.getTime();
+                            e.startTime = (Date)c.getTime().clone();
+                            c.add(Calendar.HOUR, 2);
+                            e.endTime = (Date) c.getTime().clone();
+                        } else {
+                            Calendar c = Calendar.getInstance();
+                            c.setTime(e.startTime);
+                            c.add(Calendar.HOUR, 2);
                             e.endTime = (Date) c.getTime().clone();
                         }
                     }
