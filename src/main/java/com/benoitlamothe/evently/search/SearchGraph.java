@@ -4,14 +4,11 @@ import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.sun.javafx.geom.Line2D;
-import com.sun.tools.doclint.HtmlTag;
 import com.sun.tools.internal.xjc.reader.gbind.Graph;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.joda.time.DateTime;
 
-import javax.smartcardio.ATR;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Function;
@@ -22,21 +19,19 @@ import java.util.stream.Collectors;
  */
 public class SearchGraph {
     private static final int GRAPH_FAN = 10;
-    private Connection dbConn;
+    private Event event;
     private List<ScheduleCriteria> enabledCriterias;
-    private Map<Integer, Attraction> loadedAttractions;
+    private Map<Integer, Attraction> attractions;
     private DateTime lowerBound;
     private DateTime higherBound;
     private GraphNode generatedStartNode;
 
-    public SearchGraph(Connection db, List<ScheduleCriteria> criterias, DateTime lowerBound, DateTime higherBound) throws SQLException {
-        this.dbConn = db;
+    public SearchGraph(Event event, Map<Integer, Attraction> attractions, List<ScheduleCriteria> criterias, DateTime lowerBound, DateTime higherBound) throws SQLException {
+        this.event = event;
         this.enabledCriterias = criterias;
         this.lowerBound = lowerBound;
         this.higherBound = higherBound;
-        this.loadedAttractions = Attraction.getAttractions(this.dbConn)
-                .stream()
-                .collect(Collectors.toMap(Attraction::getID, Function.identity()));
+        this.attractions = attractions;
     }
 
     public void getSubtree(GraphNode currentNode, Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor) {
@@ -48,10 +43,10 @@ public class SearchGraph {
             System.out.println(currentTime.toString() + " limit: " + timeLimit.toString() + "incrment: " + incrementFactor);
             for (Integer id : toBeExplored) {
                 GraphNode node = new GraphNode();
-                node.data = loadedAttractions.get(id);
+                node.data = attractions.get(id);
                 currentNode.children.add(node);
 
-                DateTime nextDate = incrementFactor > 0 ? currentTime.plusMinutes(loadedAttractions.get(id).duration) : currentTime.minusMinutes(loadedAttractions.get(id).duration);
+                DateTime nextDate = incrementFactor > 0 ? currentTime.plusMinutes(attractions.get(id).duration) : currentTime.minusMinutes(attractions.get(id).duration);
 
                 if (incrementFactor > 0 && nextDate.isBefore(currentTime)) {
                     throw new RuntimeException();
@@ -79,10 +74,10 @@ public class SearchGraph {
         toBeExplored = this.getBestPromising(GRAPH_FAN, toBeExplored, new GraphNode());
         for (Integer id : toBeExplored) {
             GraphNode node = new GraphNode();
-            node.data = loadedAttractions.get(id);
+            node.data = attractions.get(id);
             nodes.add(node);
 
-            DateTime nextDate = incrementFactor > 0 ? currentTime.plusMinutes(loadedAttractions.get(id).duration) : currentTime.minusMinutes(loadedAttractions.get(id).duration);
+            DateTime nextDate = incrementFactor > 0 ? currentTime.plusMinutes(attractions.get(id).duration) : currentTime.minusMinutes(attractions.get(id).duration);
             List<Integer> toBeExploredCopy = toBeExplored.stream().filter(u -> !u.equals(id)).collect(Collectors.toList());
             toBeExploredCopy = this.getBestPromising(GRAPH_FAN, toBeExploredCopy, node);
             getSubtree(node,
@@ -102,8 +97,8 @@ public class SearchGraph {
                 GraphNode o1Node = new GraphNode();
                 GraphNode o2Node = new GraphNode();
 
-                o1Node.data = loadedAttractions.get(o1);
-                o2Node.data = loadedAttractions.get(o2);
+                o1Node.data = attractions.get(o1);
+                o2Node.data = attractions.get(o2);
                 return computeScore(currentNode, o1Node).compareTo(computeScore(currentNode, o2Node));
             }
         });
@@ -129,7 +124,7 @@ public class SearchGraph {
         GraphNode startNode = new GraphNode();
         startNode.currentType = GraphNode.EndpointType.START;
         startNode.children.addAll(this.generateSearchTree(
-                this.loadedAttractions.keySet(),
+                this.attractions.keySet(),
                 DateTime.now(),
                 DateTime.now().minusMinutes(4 * 60),
                 -1));
@@ -175,10 +170,10 @@ public class SearchGraph {
         final HikariConfig config = new HikariConfig("/hikari.properties");
         final HikariDataSource ds = new HikariDataSource(config);
 
-        SearchGraph g = new SearchGraph(ds.getConnection(), new LinkedList<ScheduleCriteria>(), DateTime.now(), DateTime.now().plusHours(3));
-        Event evt = new Event();
-        evt.startTime = DateTime.now().toDate();
-
+        Map<Integer, Attraction> attractions = Attraction.getAttractions(ds.getConnection())
+                .stream()
+                .collect(Collectors.toMap(Attraction::getID, Function.identity()));
+        SearchGraph g = new SearchGraph(null, attractions, new LinkedList<ScheduleCriteria>(), DateTime.now(), DateTime.now().plusHours(3));
         g.generateGraph();
         Collection<List<GraphNode>> paths = g.listPaths();
 
