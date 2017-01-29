@@ -74,24 +74,54 @@ public class Event {
         return pst;
     }
 
+    public static Event byID(Connection conn, int id) throws SQLException {
+        PreparedStatement pst = conn.prepareStatement("SELECT * FROM Events INNER JOIN Assets ON Events.id = Assets.event_id WHERE Events.id = ?");
+        pst.setInt(1, id);
 
+        ResultSet rst = pst.executeQuery();
+        Event e = null;
+        while (rst.next()) {
+            if (e != null) {
+                e.imageSources.add(rst.getString("url"));
+                continue;
+            }
+            e = new Event();
+            e.id = rst.getInt("id");
+            e.name = rst.getString("name");
+            e.latitude = rst.getFloat("loc_lat");
+            e.longitude = rst.getFloat("loc_long");
+            e.location = rst.getString("location");
+            e.startTime = rst.getDate("startDateTime");
+            e.endTime = rst.getDate("endDateTime");
+            e.category = rst.getString("category");
+            e.description = rst.getString("description");
+            e.link = rst.getString("website");
+            e.price = rst.getFloat("price_range");
+            e.priceDisplay = rst.getString("price_display");
+
+            e.imageSources = new ArrayList<String>() {{
+                add(rst.getString("url"));
+            }};
+        }
+        return e;
+    }
 
     public static List<Event> getAll(Connection conn) throws SQLException {
         PreparedStatement pst = conn.prepareStatement("SELECT * FROM Events INNER JOIN Assets ON Events.id = Assets.event_id");
 
         ResultSet rst = pst.executeQuery();
         ArrayList<Event> events = new ArrayList<>();
-        while(rst.next()) {
+        while (rst.next()) {
             boolean duplicate = false;
-            for(Event e : events) {
-                if(e.id == rst.getInt("id")) {
+            for (Event e : events) {
+                if (e.id == rst.getInt("id")) {
                     duplicate = true;
                     e.imageSources.add(rst.getString("url"));
                     break;
                 }
             }
 
-            if(duplicate) {
+            if (duplicate) {
                 continue;
             }
 
@@ -109,7 +139,7 @@ public class Event {
             e.price = rst.getFloat("price_range");
             e.priceDisplay = rst.getString("price_display");
 
-            e.imageSources = new ArrayList<String>(){{
+            e.imageSources = new ArrayList<String>() {{
                 add(rst.getString("url"));
             }};
 

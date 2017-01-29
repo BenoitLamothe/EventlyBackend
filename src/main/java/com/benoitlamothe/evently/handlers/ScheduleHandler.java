@@ -1,12 +1,16 @@
 package com.benoitlamothe.evently.handlers;
 
+import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
+import org.joda.time.DateTime;
 import spark.Request;
 import spark.Response;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.util.List;
 
 /**
  * Created by olivier on 2017-01-28.
@@ -20,6 +24,15 @@ public class ScheduleHandler extends BaseHandler {
     @Override
     public Object handle(Request request, Response response) throws Exception {
         ScheduleRequest sr = this.serializer.fromJson(request.body(), ScheduleRequest.class);
+        Connection conn = this.dataSource.getConnection();
+        Event event = Event.byID(conn, sr.eventId);
+
+        DateTime lowerBound = sr.getAvailabilityLowerBound(event);
+        DateTime higherBound = sr.getAvailabilityHigherBound(event);
+
+
+
+        conn.close();
 
         return "";
     }
@@ -39,9 +52,53 @@ public class ScheduleHandler extends BaseHandler {
         public int eventId;
 
         @SerializedName("availability")
-        public Availability[] availability;
+        public List<Availability> availability;
 
         @SerializedName("criterias")
         public ScheduleCriteria[] criterias;
+
+        public DateTime getAvailabilityLowerBound(Event event) {
+            DateTime eventStart = new DateTime(event.startTime);
+
+            if(eventStart.getHourOfDay() < 12) {
+                //event start in am so use event start
+                return eventStart;
+            }
+            else if(eventStart.getHourOfDay() < 18) {
+                if(this.availability.contains(Availability.MORNING)) {
+                    return eventStart.withHourOfDay(8);
+                }
+            } else {
+                //event is night only
+                if(this.availability.contains(Availability.MORNING)) {
+                    return eventStart.withHourOfDay(8);
+                } else if(this.availability.contains(Availability.AFTERNOON))  {
+                    return eventStart.withHourOfDay(12);
+                }
+            }
+
+            return eventStart;
+        }
+
+        public DateTime getAvailabilityHigherBound(Event event) {
+            DateTime eventEnd = new DateTime(event.endTime);
+
+            if(eventEnd.getHourOfDay() > 18) {
+                return eventEnd;
+            } else if (eventEnd.getHourOfDay() > 12) {
+                if(this.availability.contains(Availability.EVENING))  {
+                    return eventEnd.withHourOfDay(23);
+                }
+            } else {
+                //event is am only
+                if(this.availability.contains(Availability.AFTERNOON)) {
+                    return eventEnd.withHourOfDay(18);
+                } else if(this.availability.contains(Availability.EVENING))  {
+                    return eventEnd.withHourOfDay(23);
+                }
+            }
+
+            return eventEnd;
+        }
     }
 }
