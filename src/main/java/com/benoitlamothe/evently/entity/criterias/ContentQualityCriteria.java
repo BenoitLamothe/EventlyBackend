@@ -39,10 +39,10 @@ public class ContentQualityCriteria extends ScheduleCriteria {
         Integer fromQuality = 0;
         Integer toQuality = 0;
         for(Map.Entry<String, Integer> quality: qualities.entrySet()) {
-            if(from.website.contains(quality.getKey())) {
+            if(from.website != null && from.website.contains(quality.getKey())) {
                 fromQuality = quality.getValue();
             }
-            if(to.website.contains(quality.getKey())) {
+            if(to.website != null && to.website.contains(quality.getKey())) {
                 toQuality = quality.getValue();
             }
         }
