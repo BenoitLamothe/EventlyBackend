@@ -2,6 +2,7 @@ package com.benoitlamothe.evently.handlers;
 
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
+import com.benoitlamothe.evently.search.SearchGraph;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import org.joda.time.DateTime;
@@ -30,7 +31,7 @@ public class ScheduleHandler extends BaseHandler {
         DateTime lowerBound = sr.getAvailabilityLowerBound(event);
         DateTime higherBound = sr.getAvailabilityHigherBound(event);
 
-
+        SearchGraph graph = new SearchGraph(conn, sr.criterias, lowerBound, higherBound);
 
         conn.close();
 
@@ -55,7 +56,7 @@ public class ScheduleHandler extends BaseHandler {
         public List<Availability> availability;
 
         @SerializedName("criterias")
-        public ScheduleCriteria[] criterias;
+        public List<ScheduleCriteria> criterias;
 
         public DateTime getAvailabilityLowerBound(Event event) {
             DateTime eventStart = new DateTime(event.startTime);
