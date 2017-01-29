@@ -3,6 +3,7 @@ package com.benoitlamothe.evently.handlers;
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.Itinerary;
+import com.benoitlamothe.evently.entity.criterias.RandomizationCriteria;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.benoitlamothe.evently.search.SearchGraph;
 import com.google.gson.Gson;
@@ -43,6 +44,10 @@ public class ScheduleHandler extends BaseHandler {
         DateTime lowerBound = sr.getAvailabilityLowerBound(event);
         DateTime higherBound = sr.getAvailabilityHigherBound(event);
 
+        if(sr.randomize) {
+            sr.criterias.add(new RandomizationCriteria());
+        }
+
         SearchGraph graph = new SearchGraph(event, attractions, sr.criterias, lowerBound, higherBound);
 
         List<List<Attraction>> paths = graph.listPaths();
@@ -73,6 +78,9 @@ public class ScheduleHandler extends BaseHandler {
 
         @SerializedName("criterias")
         public List<ScheduleCriteria> criterias;
+
+        @SerializedName("randomize")
+        public boolean randomize = false;
 
         public DateTime getAvailabilityLowerBound(Event event) {
             DateTime eventStart = new DateTime(event.startTime);
