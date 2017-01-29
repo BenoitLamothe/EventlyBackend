@@ -79,7 +79,7 @@ public class ScheduleHandler extends BaseHandler {
         public boolean randomize = false;
 
         public DateTime getAvailabilityLowerBound(Event event) {
-            DateTime eventStart = new DateTime(event.startTime);
+            DateTime eventStart = event.startTime;
 
             if (eventStart.getHourOfDay() < 12) {
                 //event start in am so use event start
@@ -101,8 +101,8 @@ public class ScheduleHandler extends BaseHandler {
         }
 
         public DateTime getAvailabilityHigherBound(Event event) {
-            DateTime eventEnd = new DateTime(event.endTime);
-            DateTime eventStart = new DateTime(event.startTime);
+            DateTime eventEnd = event.endTime;
+            DateTime eventStart = event.startTime;
 
             if (eventEnd.getHourOfDay() > 18) {
                 if (eventStart.getHourOfDay() > 18) {

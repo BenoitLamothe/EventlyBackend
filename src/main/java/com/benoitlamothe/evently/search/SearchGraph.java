@@ -104,9 +104,8 @@ public class SearchGraph {
     }
 
     public List<Attraction> naive(Attraction fromAttraction, List<Attraction> exclusions, int factor) {
-        DateTime currentTime = factor > 0 ? new DateTime(this.event.endTime) : new DateTime(this.event.startTime);
+        DateTime currentTime = factor > 0 ? this.event.endTime : this.event.startTime;
         DateTime limitTime = factor > 0 ? this.higherBound : this.lowerBound;
-        int timeIncrementFactor = -1;
         boolean keepOnGoing = true;
         LinkedList<Attraction> currentAttractionSet = new LinkedList<>();
         currentAttractionSet.add(fromAttraction);
@@ -123,8 +122,8 @@ public class SearchGraph {
             Attraction addAttraction = attractions.get(addAttractionOpt.get());
             currentAttractionSet.add(addAttraction);
 
-            keepOnGoing = timeIncrementFactor < 0 ? currentTime.isAfter(limitTime) : currentTime.isBefore(limitTime);
-            if (timeIncrementFactor > 0) {
+            keepOnGoing = factor < 0 ? currentTime.isAfter(limitTime) : currentTime.isBefore(limitTime);
+            if (factor > 0) {
                 currentTime = currentTime.plusMinutes(addAttraction.duration);
             } else {
                 currentTime = currentTime.minusMinutes(addAttraction.duration);
@@ -136,7 +135,7 @@ public class SearchGraph {
     public List<Attraction> computeExclusions(List<Attraction> current) {
         List<Attraction> exclusions = new LinkedList<>();
 
-        if (current.stream().filter(Attraction::isRestaurant).count() >= 1) {
+        if (current.stream().filter(Attraction::isRestaurant).count() >= 2) {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isRestaurant).collect(Collectors.toList()));
         }
 
@@ -144,11 +143,11 @@ public class SearchGraph {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isHotel).collect(Collectors.toList()));
         }
 
-        if (current.stream().filter(Attraction::isPark).count() >= 2) {
+        if (current.stream().filter(Attraction::isPark).count() >= 3) {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isPark).collect(Collectors.toList()));
         }
 
-        if (current.stream().filter(Attraction::isHeritage).count() >= 2) {
+        if (current.stream().filter(Attraction::isHeritage).count() >= 3) {
             exclusions.addAll(this.attractions.values().stream().filter(Attraction::isHeritage).collect(Collectors.toList()));
         }
 
