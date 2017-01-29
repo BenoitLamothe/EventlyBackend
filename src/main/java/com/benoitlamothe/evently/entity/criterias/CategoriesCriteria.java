@@ -59,6 +59,6 @@ public class CategoriesCriteria extends ScheduleCriteria {
             return 0.0;
         }
 
-        return found.get() * 1000;
+        return found.get() * 100;
     }
 }
