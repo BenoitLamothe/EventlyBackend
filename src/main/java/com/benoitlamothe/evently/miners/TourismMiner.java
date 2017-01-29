@@ -92,8 +92,6 @@ public class TourismMiner {
 
                     e.name = sanitize(x.select("h1").get(0).text());
 
-                    System.out.println(e.name);
-
                     e.description = sanitize(x.childNodes()
                             .stream()
                             .filter(y -> {
@@ -169,7 +167,6 @@ public class TourismMiner {
 
                     if (hourNode.isPresent()) {
                         String hourRaw = hourNode.get().nextSibling().toString();
-                        System.out.println(hourRaw);
 
                         Pattern rp = Pattern.compile("(?<fhh>[0-9]{1,2})h(?<fhm>[0-9]{1,2})?\\s*à\\s*(?<shh>[0-9]{1,2})h(?<shm>[0-9]{1,2})?");
                         Pattern p = Pattern.compile("(?<h>[0-9]{1,2})h(?<m>[0-9]{1,2})?");
@@ -178,60 +175,63 @@ public class TourismMiner {
                         Matcher fixedMatcher = p.matcher(hourRaw);
 
                         if (rangeMatcher.find()) {
-                            System.out.println("Detected hour range: " + hourRaw);
-                            Calendar cs = Calendar.getInstance();
-                            cs.setTime(e.startTime);
 
-                            cs.add(Calendar.HOUR, Integer.parseInt(rangeMatcher.group("fhh")));
+                            DateTime dateFrom = new DateTime(e.startTime);
+
+                            dateFrom = dateFrom.plusHours(Integer.parseInt(rangeMatcher.group("fhh")));
+
 
                             if(rangeMatcher.group("fhm") != null) {
-                                cs.add(Calendar.MINUTE, Integer.parseInt(rangeMatcher.group("fhm")));
+                                dateFrom = dateFrom.plusMinutes(Integer.parseInt(rangeMatcher.group("fhm")));
                             }
 
-                            e.startTime = cs.getTime();
+                            boolean fromWasFuckedup = false;
+                            if(dateFrom.getHourOfDay() < 6) {
+                                fromWasFuckedup = true;
+                                dateFrom = dateFrom.plusHours(12);
+                            }
 
-                            Calendar ce = Calendar.getInstance();
-                            ce.setTime(e.endTime);
+                            e.startTime = dateFrom.toDate();
 
-                            ce.add(Calendar.HOUR, Integer.parseInt(rangeMatcher.group("shh")));
+                            DateTime dateTo = new DateTime(e.endTime);
 
+                            dateTo = dateTo.plusHours(Integer.parseInt(rangeMatcher.group("shh")));
 
                             if(rangeMatcher.group("shm") != null) {
-                                ce.add(Calendar.MINUTE, Integer.parseInt(rangeMatcher.group("shm")));
+                                dateTo = dateTo.plusMinutes(Integer.parseInt(rangeMatcher.group("shm")));
                             }
 
-                            e.startTime = ce.getTime();
+                            if(fromWasFuckedup) {
+                                dateTo = dateTo.plusHours(12);
+                            }
+
+                            e.startTime = dateTo.toDate();
 
                         } else if (fixedMatcher.find()) {
-                            System.out.println("Detected hour: " + hourRaw);
-                            Calendar c = Calendar.getInstance();
-                            c.setTime(e.startTime);
 
-                            c.add(Calendar.HOUR, Integer.parseInt(fixedMatcher.group("h")));
+                            DateTime dateTime = new DateTime(e.startTime);
+
+                            dateTime = dateTime.plusHours(Integer.parseInt(fixedMatcher.group("h")));
 
                             if (fixedMatcher.group("m") != null) {
-                                c.add(Calendar.MINUTE, Integer.parseInt(fixedMatcher.group("m")));
+                                dateTime = dateTime.plusMinutes(Integer.parseInt(fixedMatcher.group("m")));
                             }
 
-                            e.startTime = (Date)c.getTime().clone();
-                            c.add(Calendar.HOUR, 2);
-                            e.endTime = (Date) c.getTime().clone();
+                            if(dateTime.getHourOfDay() < 6) {
+                                dateTime = dateTime.plusHours(12);
+                            }
+
+                            e.startTime = dateTime.toDate();
+                            e.endTime = dateTime.plusHours(2).toDate();
                         } else {
-                            Calendar c = Calendar.getInstance();
-                            c.setTime(e.startTime);
-                            c.add(Calendar.HOUR, 2);
-                            e.endTime = (Date) c.getTime().clone();
+                            DateTime dateTime = new DateTime(e.startTime);
+                            if(dateTime.getHourOfDay() < 6) {
+                                dateTime = dateTime.plusHours(12);
+                            }
+
+                            e.startTime = dateTime.toDate();
+                            e.endTime = dateTime.plusHours(2).toDate();
                         }
-                    }
-
-                    DateTime start = new DateTime(e.startTime);
-                    if(start.getHourOfDay() < 6) {
-                        e.startTime = start.plusHours(12).toDate();
-                    }
-
-                    DateTime end = new DateTime(e.endTime);
-                    if(end.getHourOfDay() < 6) {
-                        e.endTime = end.plusHours(12).toDate();
                     }
 
                     e.imageSources = x.select("img")

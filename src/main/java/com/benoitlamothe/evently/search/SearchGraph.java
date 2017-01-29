@@ -3,6 +3,7 @@ package com.benoitlamothe.evently.search;
 import com.benoitlamothe.evently.entity.Attraction;
 import com.benoitlamothe.evently.entity.Event;
 import com.benoitlamothe.evently.entity.criterias.CategoriesCriteria;
+import com.benoitlamothe.evently.entity.criterias.ContentQualityCriteria;
 import com.benoitlamothe.evently.entity.criterias.EulerDistanceCriteria;
 import com.benoitlamothe.evently.entity.criterias.ScheduleCriteria;
 import com.benoitlamothe.evently.utils.GeoUtil;
@@ -36,6 +37,8 @@ public class SearchGraph {
         this.lowerBound = lowerBound;
         this.higherBound = higherBound;
         this.attractions = attractions;
+
+        this.enabledCriterias.add(new ContentQualityCriteria());
     }
 
     /*public void getSubtree(GraphNode currentNode, Collection<Integer> toBeExplored, DateTime currentTime, DateTime timeLimit, int incrementFactor, int level) {
@@ -174,28 +177,17 @@ public class SearchGraph {
             return positionFactor.intValue();
         }).collect(Collectors.toList());
 
-        for(Attraction a : sortedAttraction) {
-            System.out.println(a.name + " :" + GeoUtil.distance(this.event.latitude, a.latitude, this.event.longitude, a.longitude, 0, 0));
-        }
-
         List<Attraction> before = naive(sortedAttraction.get(0), new ArrayList<>(), -1);
 
         sortedAttraction.removeAll(before);
 
-        System.out.println("===============================");
-
-        for(Attraction a : sortedAttraction) {
-            System.out.println(a.name + " :" + GeoUtil.distance(this.event.latitude, a.latitude, this.event.longitude, a.longitude, 0, 0));
-        }
 
         List<Attraction> after = naive(sortedAttraction.get(0), before, 1);
-
 
         List<List<Attraction>> ret = new ArrayList<List<Attraction>>() {{
             add(before);
             add(after);
         }};
-
 
 //        //Debug
 //        for (List<Attraction> path : ret) {
