@@ -59,6 +59,14 @@ public class Main {
                 return fmt.parseDateTime(json.getAsString());
             }
         });
+        builder.registerTypeAdapter(DateTime.class, new JsonSerializer<DateTime>() {
+            @Override
+            public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
+                final DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+                return new JsonPrimitive(fmt.print(src));
+            }
+
+        });
 
         builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
